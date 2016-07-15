@@ -408,8 +408,9 @@ class BaseValidatorMixin:
             raise ValidatorError("URI must be http: '{}'".format(value))
         return value
 
+    # Common field definitions.
     def _id_field(self, value):
-        return self._uri_type(value)
+        return self._http_uri_type(value)
 
     def _label_field(self, value):
         return self._str_or_val_lang_type(value)
@@ -467,9 +468,9 @@ class BaseValidatorMixin:
             return self._uri_type(value)
         if isinstance(value, dict):
             path = self._path + (field,)
-            context = value.get("@context")
-            if context == "http://iiif.io/api/image/2/context.json":
-                return self._sub_validate(self.ImageResourceValidator, value, path,
+            service = value.get("service")
+            if service and service.get("@context") == "http://iiif.io/api/image/2/context.json":
+                return self._sub_validate(self.ImageResourceValidator, service, path,
                                           only_resource=True, raise_warnings=self._raise_warnings)
             else:
                 val = self._uri_type(value)
@@ -564,7 +565,7 @@ class ManifestValidator(BaseValidatorMixin):
 
             # Technical properties
             Required('@id'): self._id_field,
-            Required('@type'): 'sc:Manifest',
+            Required('@type'): self._type_field,
             'viewingDirection': self._viewing_dir_field,
             'viewingHint': self._viewing_hint_field,
 
@@ -579,8 +580,11 @@ class ManifestValidator(BaseValidatorMixin):
         self._check_unknown_fields("manifest", validation_results, self.KNOWN_FIELDS)
         self._check_forbidden_fields("manifest", validation_results, self.FORBIDDEN_FIELDS)
 
-    def _id_field(self, value):
-        return self._http_uri_type(value)
+
+    def _type_field(self, value):
+        if not value == 'sc:Manifest':
+            raise Invalid("@type must be 'sc:Manifest'.")
+        return value
 
     def _context_field(self, value):
         if isinstance(value, str):
@@ -643,14 +647,14 @@ class SequenceValidator(BaseValidatorMixin):
         # An embedded sequence must contain canvases.
         self.EmbSequenceSchema = Schema(
             {
-                Required('@type'): 'sc:Sequence',
-                '@context': self._not_allowed,
-                '@id': self._http_uri_type,
-                'label': self._str_or_val_lang_type,
-                'startCanvas': self._uri_type,
+                Required('@type'): self._type_field,
+                '@id': self._id_field,
+                'startCanvas': self._startCanvas_field,
                 Required('canvases'): self._canvases_field,
                 'viewingDirection': self._viewing_direction_field,
-                'viewingHint': self._viewing_hint_field
+                'viewingHint': self._viewing_hint_field,
+
+                '@context': self._not_allowed
             },
             extra=ALLOW_EXTRA
         )
@@ -658,8 +662,8 @@ class SequenceValidator(BaseValidatorMixin):
         # A linked sequence must have an @id and no canvases
         self.LinkedSequenceSchema = Schema(
             {
-                Required('@type'): 'sc:Sequence',
-                Required('@id'): self._http_uri_type,
+                Required('@type'): self._type_field,
+                Required('@id'): self._id_field,
                 'canvases': self._not_allowed
             },
             extra=ALLOW_EXTRA
@@ -677,6 +681,14 @@ class SequenceValidator(BaseValidatorMixin):
 
     def _raise_additional_warnings(self, validation_results):
         pass
+
+    def _type_field(self, value):
+        if value != "sc:Sequence":
+            raise Invalid("@type must be 'sc:Sequence'.")
+        return value
+
+    def _startCanvas_field(self, value):
+        return self._uri_type(value)
 
     def _canvases_field(self, value):
         """Validate canvas list for Sequence."""
@@ -714,11 +726,11 @@ class CanvasValidator(BaseValidatorMixin):
     def _setup(self):
         self.CanvasSchema = Schema(
             {
-                Required('@id'): self._http_uri_type,
-                Required('@type'): 'sc:Canvas',
-                Required('label'): self._str_or_val_lang_type,
-                Required('height'): int,
-                Required('width'): int,
+                Required('@id'): self._id_field,
+                Required('@type'): self._type_field,
+                Required('label'): self._label_field,
+                Required('height'): self._height_field,
+                Required('width'): self._width_field,
                 'viewingHint': self._viewing_hint_field,
                 'images': self._images_field,
                 'other_content': self._other_content_field
@@ -734,6 +746,19 @@ class CanvasValidator(BaseValidatorMixin):
         # Canvas should have a thumbnail if it has multiple images.
         if len(validation_results.get('images', [])) > 1 and not validation_results.get("thumbnail"):
             self._handle_warning("thumbnail", "Canvas SHOULD have a thumbnail when there is more than one image")
+
+    def _type_field(self, value):
+        if value != "sc:Canvas":
+            raise Invalid("@type must be 'sc:Canvas'.")
+        return value
+
+    def _height_field(self, value):
+        if not isinstance(value, int):
+            raise Invalid("height must be int.")
+
+    def _width_field(self, value):
+        if not isinstance(value, int):
+            raise Invalid("width must be an int.")
 
     def _images_field(self, value):
         if isinstance(value, list):
@@ -773,17 +798,19 @@ class ImageResourceValidator(BaseValidatorMixin):
         self.ImageSchema = Schema(
             {
                 "@id": self._id_field,
-                Required('@type'): "oa:Annotation",
-                Required('motivation'): "sc:painting",
+                Required('@type'): self._type_field,
+                Required('motivation'): self._motivation_field,
                 Required('resource'): self._image_resource_field,
-                Required("on"): self._on_field
+                Required("on"): self._on_field,
+                'height': self._height_field,
+                'width': self._width_field
             }, extra=ALLOW_EXTRA
         )
         self.ImageResourceSchema = Schema(
             {
-                Required('@id'): self._http_uri_type,
+                Required('@id'): self._id_field,
                 '@type': self._resource_type_field,
-                "service": self._image_service_field
+                "service": self._resource_image_service_field
             }, extra=ALLOW_EXTRA
         )
 
@@ -806,17 +833,27 @@ class ImageResourceValidator(BaseValidatorMixin):
     def _raise_additional_warnings(self, validation_results):
         self._check_should_warnings("Annotation", validation_results, ["@id"])
 
-    def _id_field(self, value):
-        """Validate the @id property of an Annotation."""
-        try:
-            return self._http_uri_type(value)
-        except Invalid:
-            self._handle_warning("@id", "Field SHOULD be http.")
-            return self._uri_type(value)
+    def _type_field(self, value):
+        if value != "oa:Annotation":
+            raise Invalid("@type must be 'oa:Annotation'.")
+        return value
+
+    def _motivation_field(self, value):
+        if value != "sc:painting":
+            raise Invalid("motivation must be 'sc:painting'.")
+        return value
+
+    def _height_field(self, value):
+        if not isinstance(value, int):
+            raise Invalid("height must be int.")
+
+    def _width_field(self, value):
+        if not isinstance(value, int):
+            raise Invalid("width must be an int.")
 
     def _on_field(self, value):
         """Validate the 'on' property of an Annotation."""
-        if value != self.canvas_uri:
+        if self.canvas_uri and value != self.canvas_uri:
             raise ValidatorError("'on' must reference the canvas URI.")
         return value
 
@@ -832,12 +869,12 @@ class ImageResourceValidator(BaseValidatorMixin):
             return self.ImageResourceSchema(value['default'])
         return self.ImageResourceSchema(value)
 
-    def _image_service_field(self, value):
+    def _resource_image_service_field(self, value):
         """Validate against Service sub-schema."""
         if isinstance(value, str):
             return self._uri_type(value)
         elif isinstance(value, list):
-            return [self._image_service_field(val) for val in value]
+            return [self._resource_image_service_field(val) for val in value]
         else:
             return self.ServiceSchema(value)
 
@@ -851,24 +888,3 @@ class ImageResourceValidator(BaseValidatorMixin):
             return self._uri_type(value[0])
         else:
             return self._uri_type(value)
-
-
-def get_schema(uri):
-    """Configure a schemas based on settings relevant to given uri."""
-    import misirlou.helpers.manifest_utils.library_specific_exceptions as libraries
-
-    parsed = urllib.parse.urlparse(uri)
-    netloc = parsed.netloc
-
-    if netloc == "iiif.lib.harvard.edu":
-        return libraries.get_harvard_edu_validator()
-    if netloc == "digi.vatlib.it":
-        return libraries.get_vatlib_it_validator()
-    if netloc == "purl.stanford.edu":
-        return libraries.get_stanford_edu_validator()
-    if netloc == "iiif.archivelab.org":
-        return libraries.get_archivelab_org_validator()
-    if netloc == "gallica.bnf.fr":
-        return libraries.get_gallica_bnf_fr_validator()
-
-    return libraries.FlexibleValidator()
