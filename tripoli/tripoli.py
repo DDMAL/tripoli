@@ -3,19 +3,10 @@ import json
 from voluptuous import Schema, Required, Invalid, MultipleInvalid, ALLOW_EXTRA
 
 
-class ValidatorWarning:
-    """Warning that can hold an in-document path and a message."""
+class ValidatorException:
     def __init__(self, msg, path):
         self.msg = msg
         self.path = path
-
-    def __str__(self):
-        path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
-        output = "Warning: {}".format(self.msg)
-        return output + path
-
-    def __repr__(self):
-        return "ValidatorWarning('{}', {})".format(self.msg, self.path)
 
     def __lt__(self, other):
         return len(self.path) < len(other.path)
@@ -27,9 +18,7 @@ class ValidatorWarning:
         return str(self) == str(other)
 
 
-class ValidatorError(Invalid):
-    """Subclass of Invalid with preferred behaviour to throw to voluptuous."""
-
+class ValidatorWarning(ValidatorException):
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
         output = "Error: {}".format(self.msg)
@@ -38,14 +27,15 @@ class ValidatorError(Invalid):
     def __repr__(self):
         return "ValidatorError('{}', {})".format(self.msg, self.path)
 
-    def __eq__(self, other):
-        return str(self) == str(other)
 
-    def __hash__(self):
-        return hash(str(self))
+class ValidatorError(ValidatorException):
+    def __str__(self):
+        path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
+        output = "Error: {}".format(self.msg)
+        return output + path
 
-    def __lt__(self, other):
-        return len(self.path) < len(other.path)
+    def __repr__(self):
+        return "ValidatorError('{}', {})".format(self.msg, self.path)
 
 
 class BaseValidatorMixin:
@@ -57,6 +47,7 @@ class BaseValidatorMixin:
     def __init__(self, iiif_validator=None):
         """You should NOT override ___init___. Override setup() instead."""
         self._raise_warnings = True
+        self._raise_errors = True
         self._errors = set()
         self._path = tuple()
         self.is_valid = None
@@ -206,6 +197,13 @@ class BaseValidatorMixin:
         if self.errors:
             self.is_valid = False
 
+    def _validate_dicts(self, schema, value):
+        corrected = {}
+        for k, v in schema.items():
+            if k in value:
+                corrected[k] = v(value[k])
+        return corrected
+
     def _run_validation(self, **kwargs):
         """Do the actual action of validation. Called by validate()."""
         raise NotImplemented
@@ -232,7 +230,7 @@ class BaseValidatorMixin:
         """
         return validation_results
 
-    def _handle_warning(self, field, msg):
+    def _log_warning(self, field, msg):
         """Add a warning to the validator if warnings are being caught.
 
         :param field: The field the warning was raised on.
@@ -240,6 +238,10 @@ class BaseValidatorMixin:
         """
         if self._raise_warnings:
             self._errors.add(ValidatorWarning(msg, self._path + (field,)))
+
+    def _log_error(self, field, msg):
+        if self._raise_errors:
+            self._errors.add(ValidatorError(msg, self._path + (field,)))
 
     def _sub_validate(self, subschema, value, path, **kwargs):
         """Validate a field using another Validator.
@@ -292,7 +294,7 @@ class BaseValidatorMixin:
         """
         for f in fields:
             if not r_dict.get(f):
-                self._handle_warning(f, "{} SHOULD have {} field.".format(resource, f))
+                self._log_warning(f, "{} SHOULD have {} field.".format(resource, f))
 
     def _check_unknown_fields(self, resource, r_dict, fields):
         """Raise warnings if any fields which are not known in context are present.
@@ -303,7 +305,7 @@ class BaseValidatorMixin:
         """
         for key in r_dict.keys():
             if key not in fields:
-                self._handle_warning(key, "Unknown key '{}' in '{}'".format(key, resource))
+                self._log_warning(key, "Unknown key '{}' in '{}'".format(key, resource))
 
     def _check_forbidden_fields(self, resource, r_dict, fields):
         """Raise warnings if keys which are forbidden in context are present.
@@ -314,14 +316,14 @@ class BaseValidatorMixin:
         """
         for key in r_dict.keys():
             if key in fields:
-                self._handle_warning(key, "Key '{}' is not allowed in '{}'".format(resource))
+                self._log_warning(key, "Key '{}' is not allowed in '{}'".format(resource))
 
     # Field definitions #
     def _optional(self, field, fn):
         """Wrap a function to make its value optional (null and '' allows)"""
         def new_fn(*args):
             if args[0] == "" or args[0] is None:
-                self._handle_warning(field, "'{}' field should not be included if it is empty.".format(field))
+                self._log_warning(field, "'{}' field should not be included if it is empty.".format(field))
                 return args[0]
             return fn(*args)
         return new_fn
@@ -468,7 +470,7 @@ class BaseValidatorMixin:
         -Otherwise, check that it's ID is at least a uri.
         """
         if isinstance(value, str):
-            self._handle_warning(field, "{} SHOULD be IIIF image service.".format(field))
+            self._log_warning(field, "{} SHOULD be IIIF image service.".format(field))
             return self._uri_type(value)
         if isinstance(value, dict):
             path = self._path + (field,)
@@ -478,7 +480,7 @@ class BaseValidatorMixin:
                                           only_resource=True, raise_warnings=self._raise_warnings)
             else:
                 val = self._uri_type(value)
-                self._handle_warning(field, "{} SHOULD be IIIF image service.".format(field))
+                self._log_warning(field, "{} SHOULD be IIIF image service.".format(field))
                 return val
 
 
@@ -762,7 +764,7 @@ class CanvasValidator(BaseValidatorMixin):
     def _raise_additional_warnings(self, validation_results):
         # Canvas should have a thumbnail if it has multiple images.
         if len(validation_results.get('images', [])) > 1 and not validation_results.get("thumbnail"):
-            self._handle_warning("thumbnail", "Canvas SHOULD have a thumbnail when there is more than one image")
+            self._log_warning("thumbnail", "Canvas SHOULD have a thumbnail when there is more than one image")
 
     def _type_field(self, value):
         if value != "sc:Canvas":
@@ -806,91 +808,110 @@ class ImageResourceValidator(BaseValidatorMixin):
     FORBIDDEN_FIELDS = {"format", "height", "width", "viewingDirection", "navDate", "startCanvas", "first",
                         "last", "total", "next", "prev", "startIndex", "collections", "manifests", "members",
                         "sequences", "structures", "canvases", "resources", "otherContent", "images", "ranges"}
-    REQUIRED_FIELDS = {"@type"}
-    
+    REQUIRED_FIELDS = {"@type", "on"}
+
     def __init__(self, iiif_validator):
         """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
-        self.ImageSchema = None
-        self.ImageResourceSchema = None
-        self.ServiceSchema = None
+        self.ImageSchema = {
+            "@id": self._id_field,
+            '@type': self._type_field,
+            'motivation': self._motivation_field,
+            'resource': self._image_resource_field,
+            "on": self._on_field,
+            'height': self._height_field,
+            'width': self._width_field
+        }
+        self.ImageResourceSchema = {
+            '@id': self._id_field,
+            '@type': self._resource_type_field,
+            "service": self._resource_image_service_field
+        }
+        self.ServiceSchema = {
+            '@context': self._repeatable_uri_type,
+            '@id': self._uri_type,
+            'profile': self._service_profile_field,
+            'label': str
+        }
+
         self.canvas_uri = None
         self._setup()
 
     def _setup(self):
-        self.ImageSchema = Schema(
-            {
-                "@id": self._id_field,
-                Required('@type'): self._type_field,
-                Required('motivation'): self._motivation_field,
-                Required('resource'): self._image_resource_field,
-                Required("on"): self._on_field,
-                'height': self._height_field,
-                'width': self._width_field
-            }, extra=ALLOW_EXTRA
-        )
-        self.ImageResourceSchema = Schema(
-            {
-                Required('@id'): self._id_field,
-                '@type': self._resource_type_field,
-                "service": self._resource_image_service_field
-            }, extra=ALLOW_EXTRA
-        )
-
-        self.ServiceSchema = Schema(
-            {
-                '@context': self._repeatable_uri_type,
-                '@id': self._uri_type,
-                'profile': self._service_profile_field,
-                'label': str
-            }, extra=ALLOW_EXTRA
-        )
+        # self.ImageSchema = Schema(
+        #     {
+        #         "@id": self._id_field,
+        #         Required('@type'): self._type_field,
+        #         Required('motivation'): self._motivation_field,
+        #         Required('resource'): self._image_resource_field,
+        #         Required("on"): self._on_field,
+        #         'height': self._height_field,
+        #         'width': self._width_field
+        #     }, extra=ALLOW_EXTRA
+        # )
+        # self.ImageResourceSchema = Schema(
+        #     {
+        #         Required('@id'): self._id_field,
+        #         '@type': self._resource_type_field,
+        #         "service": self._resource_image_service_field
+        #     }, extra=ALLOW_EXTRA
+        # )
+        #
+        # self.ServiceSchema = Schema(
+        #     {
+        #         '@context': self._repeatable_uri_type,
+        #         '@id': self._uri_type,
+        #         'profile': self._service_profile_field,
+        #         'label': str
+        #     }, extra=ALLOW_EXTRA
+        # )
+        pass
 
     def _run_validation(self, canvas_uri=None, only_resource=False, **kwargs):
         self.canvas_uri = canvas_uri
         if only_resource:
-            return self.ImageResourceSchema(self._json)
+            return self._validate_dicts(self.ImageResourceSchema, self._json)
         else:
-            return self.ImageSchema(self._json)
+            return self._validate_dicts(self.ImageSchema, self._json)
 
     def _raise_additional_warnings(self, validation_results):
         self._check_should_warnings("Annotation", validation_results, ["@id"])
 
     def _type_field(self, value):
         if value != "oa:Annotation":
-            raise Invalid("@type must be 'oa:Annotation'.")
+            self._log_error("@type", "@type must be 'oa:Annotation'.")
         return value
 
     def _motivation_field(self, value):
         if value != "sc:painting":
-            raise Invalid("motivation must be 'sc:painting'.")
+            self._log_error("motivation", "motivation must be 'sc:painting'.")
         return value
 
     def _height_field(self, value):
         if not isinstance(value, int):
-            raise Invalid("height must be int.")
+            self._log_error("height", "height must be int.")
 
     def _width_field(self, value):
         if not isinstance(value, int):
-            raise Invalid("width must be an int.")
+            self._log_error("width", "width must be int.")
 
     def _on_field(self, value):
         """Validate the 'on' property of an Annotation."""
         if self.canvas_uri and value != self.canvas_uri:
-            raise ValidatorError("'on' must reference the canvas URI.")
+            self._log_error("on", "'on' must reference the canvas URI.")
         return value
 
     def _resource_type_field(self, value):
         """Validate the '@type' field of an Image Resource."""
         if value != 'dctypes:Image':
-            self._handle_warning("@type", "'@type' field SHOULD be 'dctypes:Image'")
+            self._log_warning("@type", "'@type' field SHOULD be 'dctypes:Image'")
         return value
 
     def _image_resource_field(self, value):
         """Validate image resources inside images list of Canvas"""
         if value.get('@type') == 'oa:Choice':
-            return self.ImageResourceSchema(value['default'])
-        return self.ImageResourceSchema(value)
+            return self._validate_dicts(self.ImageResourceSchema, value['default'])
+        return self._validate_dicts(self.ImageResourceSchema, value)
 
     def _resource_image_service_field(self, value):
         """Validate against Service sub-schema."""
@@ -899,7 +920,7 @@ class ImageResourceValidator(BaseValidatorMixin):
         elif isinstance(value, list):
             return [self._resource_image_service_field(val) for val in value]
         else:
-            return self.ServiceSchema(value)
+            return self._validate_dicts(self.ServiceSchema, value)
 
     def _service_profile_field(self, value):
         """Profiles in services are a special case.
