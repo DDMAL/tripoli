@@ -272,6 +272,7 @@ class BaseValidatorMixin:
                 "thumbnail": self._thumbnail_field,
                 "logo": self._logo_field,
                 "attribution": self._attribution_field,
+                "@type": self._type_field,
                 "license": self._license_field,
                 "related": self._related_field,
                 "rendering": self._rendering_field,
@@ -412,6 +413,9 @@ class BaseValidatorMixin:
     def _id_field(self, value):
         return self._http_uri_type(value)
 
+    def _type_field(self, value):
+        raise NotImplemented
+
     def _label_field(self, value):
         return self._str_or_val_lang_type(value)
 
@@ -547,9 +551,7 @@ class ManifestValidator(BaseValidatorMixin):
                  'top-to-bottom', 'bottom-to-top']
     VIEW_HINTS = ['individuals', 'paged', 'continuous']
 
-    KNOWN_FIELDS = {"label", "metadata", "description", "thumbnail", "attribution", "license", "logo",
-                    "@id", "@type", "viewingDirection", "viewingHint", "navDate", "seeAlso", "service", "related",
-                    "rendering", "within", "sequences", "structures", "@context"}
+    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"viewingDirection", "navDate", "sequences", "structures"}
 
     FORBIDDEN_FIELDS = {"format", "height", "width", "startCanvas", "first", "last", "total", "next", "prev",
                         "startIndex", "collections", "manifests", "members", "canvases", "resources", "otherContent",
@@ -579,7 +581,6 @@ class ManifestValidator(BaseValidatorMixin):
         self._check_should_warnings("manifest", validation_results, ["metadata", "description", "thumbnail"])
         self._check_unknown_fields("manifest", validation_results, self.KNOWN_FIELDS)
         self._check_forbidden_fields("manifest", validation_results, self.FORBIDDEN_FIELDS)
-
 
     def _type_field(self, value):
         if not value == 'sc:Manifest':
@@ -635,6 +636,14 @@ class SequenceValidator(BaseValidatorMixin):
     VIEW_DIRS = {'left-to-right', 'right-to-left',
                  'top-to-bottom', 'bottom-to-top'}
     VIEW_HINTS = {'individuals', 'paged', 'continuous'}
+
+    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"viewingDirection", "startCanvas", "canvases"}
+
+    FORBIDDEN_FIELDS = {"format", "height", "width", "navDate", "first", "last", "total", "next", "prev",
+                        "startIndex", "collections", "manifests", "sequences", "structures", "resources",
+                        "otherContent", "images", "ranges"}
+
+    REQUIRED_FIELDS = {"@type", "canvases"}
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
@@ -717,6 +726,14 @@ class SequenceValidator(BaseValidatorMixin):
 class CanvasValidator(BaseValidatorMixin):
     VIEW_HINTS = {'non-paged', 'facing-pages'}
 
+    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"height", "width", "otherContent", "images"}
+
+    FORBIDDEN_FIELDS = {"format", "viewingDirection", "navDate", "startCanvas", "first", "last", "total",
+                        "next", "prev", "startIndex", "collections", "manifests", "members", "sequences",
+                        "structures", "canvases", "resources", "ranges"}
+
+    REQUIRED_FIELDS = {"label", "@id", "@type", "height", "width"}
+
     def __init__(self, iiif_validator):
         """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
@@ -785,6 +802,12 @@ class CanvasValidator(BaseValidatorMixin):
 
 class ImageResourceValidator(BaseValidatorMixin):
 
+    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS
+    FORBIDDEN_FIELDS = {"format", "height", "width", "viewingDirection", "navDate", "startCanvas", "first",
+                        "last", "total", "next", "prev", "startIndex", "collections", "manifests", "members",
+                        "sequences", "structures", "canvases", "resources", "otherContent", "images", "ranges"}
+    REQUIRED_FIELDS = {"@type"}
+    
     def __init__(self, iiif_validator):
         """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
