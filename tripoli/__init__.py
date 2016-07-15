@@ -1,2 +1,2 @@
 from .tripoli import IIIFValidator, ImageResourceValidator, \
-    ManifestValidator, CanvasValidator, SequenceValidator
+    ManifestValidator, CanvasValidator, SequenceValidator, BaseValidatorMixin
