@@ -1,5 +1,6 @@
 import urllib.parse
 import json
+import functools
 from voluptuous import Schema, Required, Invalid, MultipleInvalid, ALLOW_EXTRA
 
 
@@ -21,11 +22,11 @@ class ValidatorException:
 class ValidatorWarning(ValidatorException):
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
-        output = "Error: {}".format(self.msg)
+        output = "Warning: {}".format(self.msg)
         return output + path
 
     def __repr__(self):
-        return "ValidatorError('{}', {})".format(self.msg, self.path)
+        return "ValidatorWarning('{}', {})".format(self.msg, self.path)
 
 
 class ValidatorError(ValidatorException):
@@ -39,6 +40,14 @@ class ValidatorError(ValidatorException):
 
 
 class BaseValidatorMixin:
+    """Class defines basic validation behaviour and expected attributes
+    of any IIIF validators that inherit from it."""
+    KNOWN_FIELDS = {}
+    FORBIDDEN_FIELDS = {}
+    REQUIRED_FIELDS = {}
+    RECOMMENDED_FIELDS = {}
+    VIEW_HINTS = {}
+    VIEW_DIRS = {}
     COMMON_FIELDS = {
         "label", "metadata", "description", "thumbnail", "attribution", "license", "logo",
         "@id", "@type", "viewingHint", "seeAlso", "service", "related", "rendering", "within"
@@ -144,6 +153,16 @@ class BaseValidatorMixin:
             return val
         return coerce_warnings
 
+    def _catch_errors(self, fn, *args, **kwargs):
+        """Run given function and catch any of the errors it logged.
+
+        The self._errors key will not be changed by using this function."""
+        errors = set(self._errors)
+        val = fn(*args, **kwargs)
+        diff = self._errors - errors
+        self._errors = errors
+        return val, diff
+
     def print_errors(self):
         """Print the errors in a nice format."""
         for err in self.errors:
@@ -178,7 +197,7 @@ class BaseValidatorMixin:
         try:
             self._json = json_dict
             val = self._run_validation(**kwargs)
-            val = self._check_common_fields(val, path)
+            val = self._check_common_fields(val)
             self._raise_additional_warnings(val)
             self.corrected_doc = self.modify_validation_return(val)
             self.is_valid = True
@@ -198,6 +217,14 @@ class BaseValidatorMixin:
             self.is_valid = False
 
     def _validate_dicts(self, schema, value):
+        """Compare a schema to a dict.
+
+        Emulates the behaviors of the voluptuous library, which was
+        previously used. Iterates through the schema (keys), calling each
+        function (values) on the corresponding entry in the `value` dict.
+
+        :param schema: A dict where each key maps to a function.
+        :param value: A dict to validate against the schema."""
         corrected = {}
         for k, v in schema.items():
             if k in value:
@@ -215,7 +242,7 @@ class BaseValidatorMixin:
         It is passed the block that was just validated. This is the opportunity
         to inspect for fields which SHOULD be there and throw warnings.
         """
-        raise NotImplemented
+        pass
 
     def modify_validation_return(self, validation_results):
         """Do any final corrections or checks on a block before it is returned.
@@ -264,10 +291,9 @@ class BaseValidatorMixin:
         else:
             return subschema._json
 
-    def _check_common_fields(self, val, path):
+    def _check_common_fields(self, val):
         """Validate fields that could appear on any resource."""
-        common_fields = Schema(
-            {
+        common_fields = {
                 "label": self._label_field,
                 "metadata": self._metadata_field,
                 "description:": self._description_field,
@@ -281,11 +307,10 @@ class BaseValidatorMixin:
                 "service": self._service_field,
                 "seeAlso": self._seeAlso_field,
                 "within": self._within_field,
-            }, extra=ALLOW_EXTRA
-        )
-        return common_fields(val)
+        }
+        return self._validate_dicts(common_fields, val)
 
-    def _check_should_warnings(self, resource, r_dict, fields):
+    def _check_recommended_fields(self, resource, r_dict, fields):
         """Raise warnings if fields which should be in r_dict are not.
 
         :param resource (str): The name of the resource represented by r_dict
@@ -316,7 +341,25 @@ class BaseValidatorMixin:
         """
         for key in r_dict.keys():
             if key in fields:
-                self._log_warning(key, "Key '{}' is not allowed in '{}'".format(resource))
+                self._log_error(key, "Key '{}' is not allowed in '{}'".format(key, resource))
+
+    def _check_required_fields(self, resource, r_dict, fields):
+        """
+
+        :param resource:
+        :param r_dict:
+        :param fields:
+        :return:
+        """
+        for f in fields:
+            if f not in r_dict:
+                self._log_error(f, "Key '{}' is required in '{}'".format(f, resource))
+
+    def _check_all_key_constraints(self, resource, r_dict):
+        self._check_recommended_fields(resource, r_dict, self.RECOMMENDED_FIELDS)
+        self._check_unknown_fields(resource, r_dict, self.KNOWN_FIELDS)
+        self._check_forbidden_fields(resource, r_dict, self.FORBIDDEN_FIELDS)
+        self._check_required_fields(resource, r_dict, self.REQUIRED_FIELDS)
 
     # Field definitions #
     def _optional(self, field, fn):
@@ -328,11 +371,12 @@ class BaseValidatorMixin:
             return fn(*args)
         return new_fn
 
-    def _not_allowed(self, value):
+    def _not_allowed(self, field, value):
         """Raise invalid as this key is not allowed in the context."""
-        raise ValidatorError("Key is not allowed here.")
+        self._log_error(field, "'{}' is not allowed here".format(field))
+        return value
 
-    def _str_or_val_lang_type(self, value):
+    def _str_or_val_lang_type(self, field, value):
         """Check value is str or lang/val pairs, else raise ValidatorError.
 
         Allows for repeated strings as per 5.3.2.
@@ -340,12 +384,12 @@ class BaseValidatorMixin:
         if isinstance(value, str):
             return value
         if isinstance(value, list):
-            return [self._str_or_val_lang_type(val) for val in value]
+            return [self._str_or_val_lang_type(field, val) for val in value]
         if isinstance(value, dict):
             return self._LangValPairs(value)
-        raise ValidatorError("Str_or_val_lang: {}".format(value))
+        self._log_error("field", "Illegal type (should be str, list, or dict)")
 
-    def _repeatable_string_type(self, value):
+    def _repeatable_string_type(self, field, value):
         """Allows for repeated strings as per 5.3.2."""
         if isinstance(value, str):
             return value
@@ -354,44 +398,47 @@ class BaseValidatorMixin:
                 if isinstance(val, dict):
                     return self._LangValPairs(val)
                 if not isinstance(val, str):
-                    raise ValidatorError("Overly nested strings: {}".format(value))
+                    self._log_error(field, "Overly nested strings: '{}'".format(value))
             return value
-        raise ValidatorError("repeatable_string: {}".format(value))
+        self._log_error(field, "Repeated string formatting error: '{}'".format(value))
+        return value
 
-    def _repeatable_uri_type(self, value):
+    def _repeatable_uri_type(self, field, value):
         """Allow single or repeating URIs.
 
         Based on 5.3.2 of Presentation API
         """
         if isinstance(value, list):
-            return [self._uri_type(val) for val in value]
+            return [self._uri_type(field, val) for val in value]
         else:
-            return self._uri_type(value)
+            return self._uri_type(field, value)
 
-    def _http_uri_type(self, value):
+    def _http_uri_type(self, field, value):
         """Allow single URI that MUST be http(s)
 
         Based on 5.3.2 of Presentation API
         """
-        return self._uri_type(value, http=True)
+        return self._uri_type(field, value, http=True)
 
-    def _uri_type(self, value, http=False):
+    def _uri_type(self, field, value, http=False):
         """Check value is URI type or raise ValidatorError.
 
         Allows for multiple URI representations, as per 5.3.1 of the
         Presentation API.
         """
         if isinstance(value, str):
-            return self._string_uri(value, http)
+            return self._string_uri(field, value, http)
         elif isinstance(value, dict):
             emb_uri = value.get('@id')
             if not emb_uri:
-                raise ValidatorError("URI not found: {} ".format(value))
-            return self._string_uri(emb_uri, http)
+                self._log_error(field, "URI not found: '{}'".format(value))
+                return value
+            return self._string_uri(field, emb_uri, http)
         else:
-            raise ValidatorError("Can't parse URI: {}".format(value))
+            self._log_error(field, "Can't parse URI: {}".format(value))
+            return value
 
-    def _string_uri(self, value, http=False):
+    def _string_uri(self, field, value, http=False):
         """Validate that value is a string that can be parsed as URI.
 
         This is the last stop on the recursive structure for URI checking.
@@ -399,51 +446,53 @@ class BaseValidatorMixin:
         """
         # Always raise invalid if the string field is not a string.
         if not isinstance(value, str):
-            raise ValidatorError("URI is not String: '{]'".format(value))
+            self._log_error(field, "URI is not string: '{}'".format(value))
+            return value
         # Try to parse the url.
         try:
             pieces = urllib.parse.urlparse(value)
         except AttributeError as a:
-            raise ValidatorError("URI is not valid: '{}'".format(value))
+            self._log_error(field, "URI is not valid: '{}'".format(value))
+            return value
         if not all([pieces.scheme, pieces.netloc]):
-            raise ValidatorError("URI is not valid: '{}'".format(value))
+            self._log_error(field, "URI is not valid: '{}'".format(value))
         if http and pieces.scheme not in ['http', 'https']:
-            raise ValidatorError("URI must be http: '{}'".format(value))
+            self._log_error(field, "URI must be http: '{}'".format(value))
         return value
 
     # Common field definitions.
     def _id_field(self, value):
-        return self._http_uri_type(value)
+        return self._http_uri_type("@id", value)
 
     def _type_field(self, value):
         raise NotImplemented
 
     def _label_field(self, value):
-        return self._str_or_val_lang_type(value)
+        return self._str_or_val_lang_type("label", value)
 
     def _description_field(self, value):
-        return self._str_or_val_lang_type(value)
+        return self._str_or_val_lang_type("description", value)
 
     def _attribution_field(self, value):
-        return self._str_or_val_lang_type(value)
+        return self._str_or_val_lang_type("attribution", value)
 
     def _license_field(self, value):
-        return self._repeatable_uri_type(value)
+        return self._repeatable_uri_type("license", value)
 
     def _related_field(self, value):
-        return self._repeatable_uri_type(value)
+        return self._repeatable_uri_type("related", value)
 
     def _rendering_field(self, value):
-        return self._repeatable_uri_type(value)
+        return self._repeatable_uri_type("rendering", value)
 
     def _service_field(self, value):
-        return self._repeatable_uri_type(value)
+        return self._repeatable_uri_type("service", value)
 
     def _seeAlso_field(self, value):
-        return self._repeatable_uri_type(value)
+        return self._repeatable_uri_type("seeAlso", value)
 
     def _within_field(self, value):
-        return self._repeatable_uri_type(value)
+        return self._repeatable_uri_type("within", value)
 
     def _metadata_field(self, value):
         """General type check for metadata.
@@ -452,17 +501,18 @@ class BaseValidatorMixin:
         """
         if isinstance(value, list):
             return [self._MetadataItemSchema(val) for val in value]
-        raise ValidatorError("Metadata key MUST be a list.")
+        self._log_error("metadata", "Metadata MUST be a list")
+        return value
 
     def _thumbnail_field(self, value):
         """Validate thumbnail field."""
-        return self._general_image_resource(value, "thumbnail")
+        return self._general_image_resource("thumbnail", value)
 
     def _logo_field(self, value):
         """Validate logo field."""
-        return self._general_image_resource(value, "logo")
+        return self._general_image_resource("logo", value)
 
-    def _general_image_resource(self, value, field):
+    def _general_image_resource(self, field, value):
         """Image resource validator. Basic logic is:
 
         -Check if field is string. If yes, warn that IIIF image service is preferred.
@@ -471,7 +521,7 @@ class BaseValidatorMixin:
         """
         if isinstance(value, str):
             self._log_warning(field, "{} SHOULD be IIIF image service.".format(field))
-            return self._uri_type(value)
+            return self._uri_type(field, value)
         if isinstance(value, dict):
             path = self._path + (field,)
             service = value.get("service")
@@ -479,9 +529,21 @@ class BaseValidatorMixin:
                 return self._sub_validate(self.ImageResourceValidator, service, path,
                                           only_resource=True, raise_warnings=self._raise_warnings)
             else:
-                val = self._uri_type(value)
+                val = self._uri_type(field, value)
                 self._log_warning(field, "{} SHOULD be IIIF image service.".format(field))
                 return val
+
+    def _viewing_hint_field(self, value):
+        if value not in self.VIEW_HINTS:
+            val, errors = self._catch_errors(self._uri_type, "viewingHint", value)
+            if errors:
+                self._log_error("viewingHint", "viewingHint is not known and not uri.")
+
+    def _viewing_dir_field(self, value):
+        """Validate against VIEW_DIRS list."""
+        if value not in self.VIEW_DIRS:
+            raise self._log_error("viewingDirection", "Invalid viewinDirection in this context: {}".format(value))
+        return value
 
 
 class IIIFValidator(BaseValidatorMixin):
@@ -528,13 +590,13 @@ class IIIFValidator(BaseValidatorMixin):
             try:
                 json_dict = json.loads(json_dict)
             except ValueError:
-                self._errors.add(ValidatorError("Could not parse json."))
+                self._errors.add(ValidatorError("Could not parse json.", tuple()))
                 self.is_valid = False
 
         doc_type = json_dict.get("@type")
         validator = self._TYPE_MAP.get(doc_type)
         if not validator:
-            self._errors.add(ValidatorError("Unknown @type: '{}'".format(doc_type)))
+            self._errors.add(ValidatorError("Unknown @type: '{}'".format(doc_type), tuple()))
             self.is_valid = False
 
         self._sub_validate(validator, json_dict, path=None, **kwargs)
@@ -553,36 +615,22 @@ class ManifestValidator(BaseValidatorMixin):
                  'top-to-bottom', 'bottom-to-top']
     VIEW_HINTS = ['individuals', 'paged', 'continuous']
 
-    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"viewingDirection", "navDate", "sequences", "structures"}
-
+    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"viewingDirection", "navDate", "sequences", "structures", "@context"}
     FORBIDDEN_FIELDS = {"format", "height", "width", "startCanvas", "first", "last", "total", "next", "prev",
                         "startIndex", "collections", "manifests", "members", "canvases", "resources", "otherContent",
                         "images", "ranges"}
-
     REQUIRED_FIELDS = {"label", "@context", "@id", "@type", "sequences"}
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
-        self.ManifestSchema = Schema({
-            Required('label'): self._label_field,
-            Required('@context'): self._context_field,
-
-            # Technical properties
-            Required('@id'): self._id_field,
-            Required('@type'): self._type_field,
-            'viewingDirection': self._viewing_dir_field,
-            'viewingHint': self._viewing_hint_field,
-
-            Required('sequences'): self._sequences_field
-        }, extra=ALLOW_EXTRA)
+        self.ManifestSchema = {
+            'sequences': self._sequences_field,
+            'structures': self._structures_field
+        }
 
     def _run_validation(self, **kwargs):
-        return self.ManifestSchema(self._json)
-
-    def _raise_additional_warnings(self, validation_results):
-        self._check_should_warnings("manifest", validation_results, ["metadata", "description", "thumbnail"])
-        self._check_unknown_fields("manifest", validation_results, self.KNOWN_FIELDS)
-        self._check_forbidden_fields("manifest", validation_results, self.FORBIDDEN_FIELDS)
+        self._check_all_key_constraints("manifest", self._json)
+        return self._validate_dicts(self.ManifestSchema, self._json)
 
     def _type_field(self, value):
         if not value == 'sc:Manifest':
@@ -592,31 +640,13 @@ class ManifestValidator(BaseValidatorMixin):
     def _context_field(self, value):
         if isinstance(value, str):
             if not value == self.PRESENTATION_API_URI:
-                raise ValidatorError("'@context' must be set to '{}'".format(self.PRESENTATION_API_URI))
+                self._log_error("@context", "'@context' must be set to '{}'".format(self.PRESENTATION_API_URI))
         if isinstance(value, list):
             if self.PRESENTATION_API_URI not in value:
-                raise ValidatorError("'@context' must be set to '{}'".format(self.PRESENTATION_API_URI))
+                self._log_error("@context", "'@context' must be set to '{}'".format(self.PRESENTATION_API_URI))
         return value
 
-    def _metadata_field(self, value):
-        """General type check for metadata.
-
-        Recurse into keys/values and checks that they are properly formatted.
-        """
-        if isinstance(value, list):
-            return [self._MetadataItemSchema(val) for val in value]
-        raise ValidatorError("Metadata key MUST be a list.")
-
-    def _viewing_dir_field(self, value):
-        """Validate against VIEW_DIRS list."""
-        if value not in self.VIEW_DIRS:
-            raise ValidatorError("viewingDirection: {}".format(value))
-        return value
-
-    def _viewing_hint_field(self, value):
-        """Validate against VIEW_HINTS list."""
-        if value not in self.VIEW_HINTS:
-            raise ValidatorError("viewingHint: {}".format(value))
+    def _structures_field(self, value):
         return value
 
     def _sequences_field(self, value):
@@ -626,7 +656,8 @@ class ManifestValidator(BaseValidatorMixin):
         """
         path = self._path + ("sequences",)
         if not isinstance(value, list):
-            raise ValidatorError("'sequences' must be a list.")
+            self._log_error("sequences", "'sequences' MUST be a list")
+            return value
         lst = [self._sub_validate(self.SequenceValidator, value[0], path,
                                   raise_warnings=self._raise_warnings, emb=True)]
         lst.extend([self._sub_validate(self.SequenceValidator, value[s], path,
@@ -640,126 +671,90 @@ class SequenceValidator(BaseValidatorMixin):
     VIEW_HINTS = {'individuals', 'paged', 'continuous'}
 
     KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"viewingDirection", "startCanvas", "canvases"}
-
     FORBIDDEN_FIELDS = {"format", "height", "width", "navDate", "first", "last", "total", "next", "prev",
                         "startIndex", "collections", "manifests", "sequences", "structures", "resources",
                         "otherContent", "images", "ranges"}
-
     REQUIRED_FIELDS = {"@type", "canvases"}
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
-        self.EmbSequenceSchema = None
-        self.LinkedSequenceSchema = None
-        self._setup()
-
-    def _setup(self):
-
-        # An embedded sequence must contain canvases.
-        self.EmbSequenceSchema = Schema(
-            {
-                Required('@type'): self._type_field,
+        self.EmbSequenceSchema = {
+                '@type': self._type_field,
                 '@id': self._id_field,
                 'startCanvas': self._startCanvas_field,
-                Required('canvases'): self._canvases_field,
-                'viewingDirection': self._viewing_direction_field,
+                'canvases': self._canvases_field,
+                'viewingDirection': self._viewing_dir_field,
                 'viewingHint': self._viewing_hint_field,
 
                 '@context': self._not_allowed
-            },
-            extra=ALLOW_EXTRA
-        )
-
-        # A linked sequence must have an @id and no canvases
-        self.LinkedSequenceSchema = Schema(
-            {
+            }
+        self.LinkedSequenceSchema = {
                 Required('@type'): self._type_field,
                 Required('@id'): self._id_field,
                 'canvases': self._not_allowed
-            },
-            extra=ALLOW_EXTRA
-        )
+            }
 
     def _run_validation(self, **kwargs):
+        self._check_all_key_constraints("sequence", self._json)
         return self._validate_sequence(**kwargs)
 
     def _validate_sequence(self, emb=True):
-        value = self._json
         if emb:
-            return self.EmbSequenceSchema(value)
+            return self._validate_dicts(self.EmbSequenceSchema, self._json)
         else:
-            return self.LinkedSequenceSchema(value)
+            return self._validate_dicts(self.LinkedSequenceSchema, self._json)
 
     def _raise_additional_warnings(self, validation_results):
         pass
 
     def _type_field(self, value):
         if value != "sc:Sequence":
-            raise Invalid("@type must be 'sc:Sequence'.")
+            self._log_error("@type", "@type must be 'sc:Sequence'")
         return value
 
     def _startCanvas_field(self, value):
-        return self._uri_type(value)
+        return self._uri_type("startCanvas", value)
 
     def _canvases_field(self, value):
         """Validate canvas list for Sequence."""
         if not isinstance(value, list):
-            raise ValidatorError("'canvases' MUST be a list.")
+            self._log_error("canvases", "'canvases' MUST be a list.")
+            return value
         if len(value) < 1:
-            raise ValidatorError("'canvases' MUST have at least one entry.")
+            self._log_error("canvases", "'canvases' MUST have at least one entry")
+            return value
         path = self._path + ("canvases",)
         return [self._sub_validate(self.CanvasValidator, c, path,
                                    raise_warnings=self._raise_warnings) for c in value]
-
-    def _viewing_hint_field(self, value):
-        if value not in self.VIEW_HINTS:
-            try:
-                return self._uri_type(value)
-            except Invalid:
-                raise ValidatorError("Viewing hint is not known and not uri.")
-        return value
-
-    def _viewing_direction_field(self, value):
-        if value not in self.VIEW_DIRS:
-            raise Invalid("Unknown viewingDirection.")
-        return value
 
 
 class CanvasValidator(BaseValidatorMixin):
     VIEW_HINTS = {'non-paged', 'facing-pages'}
 
     KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"height", "width", "otherContent", "images"}
-
     FORBIDDEN_FIELDS = {"format", "viewingDirection", "navDate", "startCanvas", "first", "last", "total",
                         "next", "prev", "startIndex", "collections", "manifests", "members", "sequences",
                         "structures", "canvases", "resources", "ranges"}
-
     REQUIRED_FIELDS = {"label", "@id", "@type", "height", "width"}
 
     def __init__(self, iiif_validator):
         """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
-        self.CanvasSchema = None
-        self._setup()
-
-    def _setup(self):
-        self.CanvasSchema = Schema(
-            {
-                Required('@id'): self._id_field,
-                Required('@type'): self._type_field,
-                Required('label'): self._label_field,
-                Required('height'): self._height_field,
-                Required('width'): self._width_field,
+        self.CanvasSchema = {
+                '@id': self._id_field,
+                '@type': self._type_field,
+                'label': self._label_field,
+                'height': self._height_field,
+                'width': self._width_field,
                 'viewingHint': self._viewing_hint_field,
                 'images': self._images_field,
                 'other_content': self._other_content_field
-            },
-            extra=ALLOW_EXTRA
-        )
+            }
 
     def _run_validation(self, **kwargs):
         self.canvas_uri = self._json['@id']
-        return self.CanvasSchema(self._json)
+        self._check_all_key_constraints("Canvas", self._json)
+        return self._validate_dicts(self.CanvasSchema, self._json)
 
     def _raise_additional_warnings(self, validation_results):
         # Canvas should have a thumbnail if it has multiple images.
@@ -768,16 +763,18 @@ class CanvasValidator(BaseValidatorMixin):
 
     def _type_field(self, value):
         if value != "sc:Canvas":
-            raise Invalid("@type must be 'sc:Canvas'.")
+            self._log_error("@type", "@type must be 'sc:Canvas'.")
         return value
 
     def _height_field(self, value):
         if not isinstance(value, int):
             raise Invalid("height must be int.")
+        return value
 
     def _width_field(self, value):
         if not isinstance(value, int):
             raise Invalid("width must be an int.")
+        return value
 
     def _images_field(self, value):
         if isinstance(value, list):
@@ -786,29 +783,26 @@ class CanvasValidator(BaseValidatorMixin):
                                        canvas_uri=self.canvas_uri,
                                        raise_warnings=self._raise_warnings) for i in value]
         if not value:
-            return
-        raise ValidatorError("'images' must be a list")
+            self._log_warning("images", "'images' SHOULD have values.")
+            return value
+        self._log_error("images", "'images' must be a list.")
+        return value
 
     def _other_content_field(self, value):
         if not isinstance(value, list):
-            raise ValidatorError("otherContent must be list!")
-        return [self._uri_type(item['@id']) for item in value]
-
-    def _viewing_hint_field(self, value):
-        if value not in self.VIEW_HINTS:
-            try:
-                return self._uri_type(value)
-            except Invalid:
-                raise ValidatorError("Viewing hint is not known and not uri.")
+            self._log_error("otherContent", "otherContent must be a list.")
+            return value
+        return [self._uri_type("otherContent", item['@id']) for item in value]
 
 
 class ImageResourceValidator(BaseValidatorMixin):
 
-    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS
+    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"motivation", "resource", "on"}
     FORBIDDEN_FIELDS = {"format", "height", "width", "viewingDirection", "navDate", "startCanvas", "first",
                         "last", "total", "next", "prev", "startIndex", "collections", "manifests", "members",
                         "sequences", "structures", "canvases", "resources", "otherContent", "images", "ranges"}
-    REQUIRED_FIELDS = {"@type", "on"}
+    REQUIRED_FIELDS = {"@type", "on", "motivation"}
+    RECOMMENDED_FIELDS = {"@id"}
 
     def __init__(self, iiif_validator):
         """You should not override ___init___. Override setup() instead."""
@@ -828,54 +822,24 @@ class ImageResourceValidator(BaseValidatorMixin):
             "service": self._resource_image_service_field
         }
         self.ServiceSchema = {
-            '@context': self._repeatable_uri_type,
-            '@id': self._uri_type,
+            '@context': functools.partial(self._repeatable_uri_type, "@context"),
+            '@id': self._id_field,
             'profile': self._service_profile_field,
-            'label': str
+            'label': self._label_field
         }
 
         self.canvas_uri = None
-        self._setup()
 
-    def _setup(self):
-        # self.ImageSchema = Schema(
-        #     {
-        #         "@id": self._id_field,
-        #         Required('@type'): self._type_field,
-        #         Required('motivation'): self._motivation_field,
-        #         Required('resource'): self._image_resource_field,
-        #         Required("on"): self._on_field,
-        #         'height': self._height_field,
-        #         'width': self._width_field
-        #     }, extra=ALLOW_EXTRA
-        # )
-        # self.ImageResourceSchema = Schema(
-        #     {
-        #         Required('@id'): self._id_field,
-        #         '@type': self._resource_type_field,
-        #         "service": self._resource_image_service_field
-        #     }, extra=ALLOW_EXTRA
-        # )
-        #
-        # self.ServiceSchema = Schema(
-        #     {
-        #         '@context': self._repeatable_uri_type,
-        #         '@id': self._uri_type,
-        #         'profile': self._service_profile_field,
-        #         'label': str
-        #     }, extra=ALLOW_EXTRA
-        # )
+    def _raise_additional_warnings(self, validation_results):
         pass
 
     def _run_validation(self, canvas_uri=None, only_resource=False, **kwargs):
         self.canvas_uri = canvas_uri
+        self._check_all_key_constraints("ImageResource", self._json)
         if only_resource:
             return self._validate_dicts(self.ImageResourceSchema, self._json)
         else:
             return self._validate_dicts(self.ImageSchema, self._json)
-
-    def _raise_additional_warnings(self, validation_results):
-        self._check_should_warnings("Annotation", validation_results, ["@id"])
 
     def _type_field(self, value):
         if value != "oa:Annotation":
@@ -916,7 +880,7 @@ class ImageResourceValidator(BaseValidatorMixin):
     def _resource_image_service_field(self, value):
         """Validate against Service sub-schema."""
         if isinstance(value, str):
-            return self._uri_type(value)
+            return self._uri_type("resource", value)
         elif isinstance(value, list):
             return [self._resource_image_service_field(val) for val in value]
         else:
@@ -929,6 +893,6 @@ class ImageResourceValidator(BaseValidatorMixin):
         metadata and a uri in the first position.
         """
         if isinstance(value, list):
-            return self._uri_type(value[0])
+            return self._uri_type("profile", value[0])
         else:
-            return self._uri_type(value)
+            return self._uri_type("profile", value)
