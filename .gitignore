@@ -2,3 +2,4 @@ test_manifests
 .idea
 __pycache__
 .env
+docs/_build
