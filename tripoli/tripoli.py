@@ -2,13 +2,18 @@ import urllib.parse
 import json
 import functools
 import contextlib
+import traceback
 
 
-class ValidatorException:
+class ValidatorLogEntry:
     """Basic error class with comparison behavior for hashing."""
-    def __init__(self, msg, path):
+    def __init__(self, msg, path, tb=None):
         self.msg = msg
         self.path = path
+        self._tb = tb if tb else []
+
+    def print_trace(self):
+        traceback.print_list(self._tb)
 
     def __lt__(self, other):
         return len(self.path) < len(other.path)
@@ -20,7 +25,7 @@ class ValidatorException:
         return str(self) == str(other)
 
 
-class ValidatorWarning(ValidatorException):
+class ValidatorLogWarning(ValidatorLogEntry):
     """Class to hold and present warnings."""
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
@@ -28,10 +33,10 @@ class ValidatorWarning(ValidatorException):
         return output + path
 
     def __repr__(self):
-        return "ValidatorWarning('{}', {})".format(self.msg, self.path)
+        return "ValidatorLogWarning('{}', {})".format(self.msg, self.path)
 
 
-class ValidatorError(ValidatorException):
+class ValidatorLogError(ValidatorLogEntry):
     """Class to hold and present errors."""
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
@@ -39,7 +44,7 @@ class ValidatorError(ValidatorException):
         return output + path
 
     def __repr__(self):
-        return "ValidatorError('{}', {})".format(self.msg, self.path)
+        return "ValidatorLogError('{}', {})".format(self.msg, self.path)
 
 
 class LinkedValidatorMixin:
@@ -50,23 +55,33 @@ class LinkedValidatorMixin:
         self.is_valid = None
         self._IIIFValidator = iiif_validator
 
-    @property
-    def errors(self):
-        return list(self._errors)
+        self._collect_warnings = True
+        self._collect_errors = True
+        self._debug = True
 
     @property
-    def warnings(self):
-        return list(self._warnings)
+    def collect_warnings(self):
+        return self._IIIFValidator._collect_warnings
 
-    def print_errors(self):
-        """Print the errors in a nice format."""
-        for err in self._errors:
-            print(err)
+    @collect_warnings.setter
+    def collect_warnings(self, value):
+        self._IIIFValidator._collect_warnings = value
 
-    def print_warnings(self):
-        """Print the warnings in a nice format."""
-        for warn in self._warnings:
-            print(warn)
+    @property
+    def collect_errors(self):
+        return self._IIIFValidator._collect_errors
+
+    @collect_errors.setter
+    def collect_errors(self, value):
+        self._IIIFValidator._collect_errors= value
+
+    @property
+    def debug(self):
+        return self._IIIFValidator._debug
+
+    @debug.setter
+    def debug(self, value):
+        self._IIIFValidator._debug = value
 
     @property
     def ManifestValidator(self):
@@ -99,6 +114,24 @@ class LinkedValidatorMixin:
     @ImageResourceValidator.setter
     def ImageResourceValidator(self, value):
         self._IIIFValidator._ImageResourceValidator = value(self._IIIFValidator)
+
+    @property
+    def errors(self):
+        return list(self._errors)
+
+    @property
+    def warnings(self):
+        return list(self._warnings)
+
+    def print_errors(self):
+        """Print the errors in a nice format."""
+        for err in self._errors:
+            print(err)
+
+    def print_warnings(self):
+        """Print the warnings in a nice format."""
+        for warn in self._warnings:
+            print(warn)
 
     def _sub_validate(self, subschema, value, path, **kwargs):
         """Validate a field using another Validator.
@@ -145,8 +178,6 @@ class BaseValidatorMixin(LinkedValidatorMixin):
     def __init__(self, iiif_validator=None):
         """You should NOT override ___init___. Override setup() instead."""
         super().__init__(iiif_validator=iiif_validator)
-        self._raise_warnings = True
-        self._raise_errors = True
         self._path = tuple()
         self._json = None
         self.corrected_doc = None
@@ -225,10 +256,8 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         self._errors = set()
         self._path = path
 
-    def _validate(self, json_dict, path=None, raise_warnings=None, **kwargs):
+    def _validate(self, json_dict, path=None,  **kwargs):
         """Entry point for callers to validate a chunk of data."""
-        if raise_warnings is not None:
-            self._raise_warnings = raise_warnings
 
         # Reset the validator object constants.
         if not path:
@@ -299,8 +328,9 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         :param field: The field the warning was raised on.
         :param msg: The message to associate with the warning.
         """
-        if self._raise_warnings:
-            self._warnings.add(ValidatorWarning(msg, self._path + (field,)))
+        tb = traceback.extract_stack()[:-1] if self.debug else None
+        if self.collect_warnings:
+            self._warnings.add(ValidatorLogWarning(msg, self._path + (field,), tb))
 
     def log_error(self, field, msg):
         """Add an error to the validator.
@@ -308,8 +338,9 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         :param field: The field the error was raised on.
         :param msg: The message to associate with the error.
         """
-        if self._raise_errors:
-            self._errors.add(ValidatorError(msg, self._path + (field,)))
+        tb = traceback.extract_stack()[:-1] if self.debug else None
+        if self.collect_errors:
+            self._errors.add(ValidatorLogError(msg, self._path + (field,), tb))
 
     def _check_common_fields(self, val):
         """Validate fields that could appear on any resource."""
@@ -398,7 +429,7 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         return value
 
     def _str_or_val_lang_type(self, field, value):
-        """Check value is str or lang/val pairs, else raise ValidatorError.
+        """Check value is str or lang/val pairs, else raise ValidatorLogError.
 
         Allows for repeated strings as per 5.3.2.
         """
@@ -447,7 +478,7 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         return self._uri_type(field, value, http=True)
 
     def _uri_type(self, field, value, http=False):
-        """Check value is URI type or raise ValidatorError.
+        """Check value is URI type or raise ValidatorLogError.
 
         Allows for multiple URI representations, as per 5.3.1 of the
         Presentation API.
@@ -578,7 +609,7 @@ class BaseValidatorMixin(LinkedValidatorMixin):
             service = value.get("service")
             if service and service.get("@context") == "http://iiif.io/api/image/2/context.json":
                 return self._sub_validate(self.ImageResourceValidator, service, path,
-                                          only_resource=True, raise_warnings=self._raise_warnings)
+                                          only_resource=True)
             else:
                 val = self._uri_type(field, value)
                 self.log_warning(field, "{} SHOULD be IIIF image service.".format(field))
@@ -608,6 +639,9 @@ class IIIFValidator(LinkedValidatorMixin):
         self._ImageResourceValidator = None
         self._CanvasValidator = None
         self._SequenceValidator = None
+        self._debug = True
+        self._collect_warnings = True
+        self._collect_errors = True
         self._setup_to_validate()
 
     def _setup_to_validate(self):
@@ -627,6 +661,8 @@ class IIIFValidator(LinkedValidatorMixin):
             "sc:Canvas": self._CanvasValidator,
             "oa:Annotation": self._ImageResourceValidator
         }
+        self._errors = set()
+        self._warnings = set()
 
     def _set_from_sub(self, sub):
         """Set the validation attributes to those of a sub_validator.
@@ -648,13 +684,13 @@ class IIIFValidator(LinkedValidatorMixin):
             try:
                 json_dict = json.loads(json_dict)
             except ValueError:
-                self._errors.add(ValidatorError("Could not parse json.", tuple()))
+                self._errors.add(ValidatorLogError("Could not parse json.", tuple()))
                 self.is_valid = False
 
         doc_type = json_dict.get("@type")
         validator = self._TYPE_MAP.get(doc_type)
         if not validator:
-            self._errors.add(ValidatorError("Unknown @type: '{}'".format(doc_type), tuple()))
+            self._errors.add(ValidatorLogError("Unknown @type: '{}'".format(doc_type), tuple()))
             self.is_valid = False
 
         self._sub_validate(validator, json_dict, path=None, **kwargs)
@@ -715,10 +751,8 @@ class ManifestValidator(BaseValidatorMixin):
         if not isinstance(value, list):
             self.log_error("sequences", "'sequences' MUST be a list")
             return value
-        lst = [self._sub_validate(self.SequenceValidator, value[0], path,
-                                  raise_warnings=self._raise_warnings, emb=True)]
-        lst.extend([self._sub_validate(self.SequenceValidator, value[s], path,
-                                       raise_warnings=self._raise_warnings, emb=False) for s in lst[1:]])
+        lst = [self._sub_validate(self.SequenceValidator, value[0], path, emb=True)]
+        lst.extend([self._sub_validate(self.SequenceValidator, value[s], path, emb=False) for s in lst[1:]])
         return lst
 
 
@@ -781,8 +815,7 @@ class SequenceValidator(BaseValidatorMixin):
             self.log_error("canvases", "'canvases' MUST have at least one entry")
             return value
         path = self._path + ("canvases",)
-        return [self._sub_validate(self.CanvasValidator, c, path,
-                                   raise_warnings=self._raise_warnings) for c in value]
+        return [self._sub_validate(self.CanvasValidator, c, path) for c in value]
 
 
 class CanvasValidator(BaseValidatorMixin):
@@ -837,8 +870,7 @@ class CanvasValidator(BaseValidatorMixin):
         if isinstance(value, list):
             path = self._path + ("images",)
             return [self._sub_validate(self.ImageResourceValidator, i, path,
-                                       canvas_uri=self.canvas_uri,
-                                       raise_warnings=self._raise_warnings) for i in value]
+                                       canvas_uri=self.canvas_uri) for i in value]
         if not value:
             self.log_warning("images", "'images' SHOULD have values.")
             return value
