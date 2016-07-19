@@ -5,6 +5,7 @@ import contextlib
 
 
 class ValidatorException:
+    """Basic error class with comparison behavior for hashing."""
     def __init__(self, msg, path):
         self.msg = msg
         self.path = path
@@ -20,6 +21,7 @@ class ValidatorException:
 
 
 class ValidatorWarning(ValidatorException):
+    """Class to hold and present warnings."""
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
         output = "Warning: {}".format(self.msg)
@@ -30,6 +32,7 @@ class ValidatorWarning(ValidatorException):
 
 
 class ValidatorError(ValidatorException):
+    """Class to hold and present errors."""
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
         output = "Error: {}".format(self.msg)
@@ -122,7 +125,7 @@ class LinkedValidatorMixin:
 
 
 class BaseValidatorMixin(LinkedValidatorMixin):
-    """Class defines basic validation behaviour and expected attributes
+    """Defines basic validation behaviour and expected attributes
     of any IIIF validators that inherit from it."""
 
     """The following constants will be iterated through and have their
@@ -190,10 +193,17 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         return coerce_warnings
 
     @contextlib.contextmanager
-    def _with_path(self, p):
+    def _temp_path(self, path):
+        """Temporarily set the path to the given path.
+
+        Useful when validating an embedded dictionary
+        and adding its path to the current path.
+
+        :param path (iter): The path to temporarily use.
+        """
         old_path = self._path
         try:
-            self._path = p
+            self._path = path
             yield
         finally:
             self._path = old_path
@@ -398,13 +408,14 @@ class BaseValidatorMixin(LinkedValidatorMixin):
             return [self._str_or_val_lang_type(field, val) for val in value]
         if isinstance(value, dict):
             if "@value" not in value:
-                self.log_error(field, "Field has no '@value' key.")
+                self.log_error(field, "Field has no '@value' key where one is required.")
                 return value
             if "@language" not in value:
-                self.log_error(field, "Field has no '@language' key.")
+                self.log_error(field, "Field has no '@language' key where one is required.")
                 return value
             return self._compare_dicts(self._LangValPairs, value)
-        self.log_error("field", "Illegal type (should be str, list, or dict)")
+        self.log_error(field, "Illegal type (should be str, list, or dict)")
+        return value
 
     def _repeatable_string_type(self, field, value):
         """Allows for repeated strings as per 5.3.2."""
@@ -412,12 +423,10 @@ class BaseValidatorMixin(LinkedValidatorMixin):
             return value
         if isinstance(value, list):
             for val in value:
-                if isinstance(val, dict):
-                    return self._compare_dicts(self._LangValPairs, val)
                 if not isinstance(val, str):
                     self.log_error(field, "Overly nested strings: '{}'".format(value))
             return value
-        self.log_error(field, "Repeated string formatting error: '{}'".format(value))
+        self.log_error(field, "Got '{}' when expecting string or repeated string.".format(value))
         return value
 
     def _repeatable_uri_type(self, field, value):
@@ -480,58 +489,77 @@ class BaseValidatorMixin(LinkedValidatorMixin):
 
     # Common field definitions.
     def id_field(self, value):
+        """Validate the `@id` field of the resource."""
         return self._http_uri_type("@id", value)
 
     def type_field(self, value):
+        """Validate the `@type` field of the resource."""
         raise NotImplemented
 
     def label_field(self, value):
+        """Validate the `label` field of the resource."""
         return self._str_or_val_lang_type("label", value)
 
     def description_field(self, value):
+        """Validate the `description` field of the resource."""
         return self._str_or_val_lang_type("description", value)
 
     def attribution_field(self, value):
+        """Validate the `attribution` field of the resource."""
         return self._str_or_val_lang_type("attribution", value)
 
     def license_field(self, value):
+        """Validate the `license` field of the resource."""
         return self._repeatable_uri_type("license", value)
 
     def related_field(self, value):
+        """Validate the `related` field of the resource."""
         return self._repeatable_uri_type("related", value)
 
     def rendering_field(self, value):
+        """Validate the `rendering` field of the resource."""
         return self._repeatable_uri_type("rendering", value)
 
     def service_field(self, value):
+        """Validate the `service` field of the resource."""
         return self._repeatable_uri_type("service", value)
 
     def seeAlso_field(self, value):
+        """Validate the `seeAlso` field of the resource."""
         return self._repeatable_uri_type("seeAlso", value)
 
     def within_field(self, value):
+        """Validate the `within` field of the resource."""
         return self._repeatable_uri_type("within", value)
 
     def metadata_field(self, value):
-        """General type check for metadata.
+        """Validate the `metadata` field of the resource.
 
         Recurse into keys/values and checks that they are properly formatted.
         """
         if isinstance(value, list):
-            with self._with_path(self._path + ("metadata",)):
+            with self._temp_path(self._path + ("metadata",)):
                 for m in value:
-                    self._str_or_val_lang_type("value", m.get("value"))
-                    self._str_or_val_lang_type("label", m.get("label"))
+                    if isinstance(m, dict):
+                        if "label" not in m:
+                            self.log_error("label", "metadata entries must have labels.")
+                        elif "value" not in m:
+                            self.log_error("value", "metadata entries must have values")
+                        else:
+                            self._str_or_val_lang_type("value", m.get("value"))
+                            self._str_or_val_lang_type("label", m.get("label"))
+                    else:
+                        self.log_error("value", "Entries must be dictionaries.")
             return value
         self.log_error("metadata", "Metadata MUST be a list")
         return value
 
     def thumbnail_field(self, value):
-        """Validate thumbnail field."""
+        """Validate the `thumbnail` field of the resource."""
         return self._general_image_resource("thumbnail", value)
 
     def logo_field(self, value):
-        """Validate logo field."""
+        """Validate the `logo` field of the resource."""
         return self._general_image_resource("logo", value)
 
     def _general_image_resource(self, field, value):
@@ -555,18 +583,20 @@ class BaseValidatorMixin(LinkedValidatorMixin):
                 val = self._uri_type(field, value)
                 self.log_warning(field, "{} SHOULD be IIIF image service.".format(field))
                 return val
+        self.log_error(field, "{} type should be string or dict.".format(field))
+        return value
 
     def viewing_hint_field(self, value):
         if value not in self.VIEW_HINTS:
             val, errors = self._catch_errors(self._uri_type, "viewingHint", value)
             if errors:
-                self.log_error("viewingHint", "viewingHint is not known and not uri.")
+                self.log_error("viewingHint", "viewingHint '{}' is not valid and not uri.".format(value))
         return value
 
     def viewing_dir_field(self, value):
         """Validate against VIEW_DIRS list."""
         if value not in self.VIEW_DIRS:
-            raise self.log_error("viewingDirection", "Invalid viewinDirection in this context: {}".format(value))
+            raise self.log_error("viewingDirection", "viewingDirection '{}' is not valid and not uri.".format(value))
         return value
 
 
@@ -578,6 +608,7 @@ class IIIFValidator(LinkedValidatorMixin):
         self._ImageResourceValidator = None
         self._CanvasValidator = None
         self._SequenceValidator = None
+        self._setup_to_validate()
 
     def _setup_to_validate(self):
         """Make sure all links to sub validators exist."""
@@ -608,6 +639,10 @@ class IIIFValidator(LinkedValidatorMixin):
         self.corrected_doc = sub.corrected_doc
 
     def validate(self, json_dict, **kwargs):
+        """Determine the correct validator and validate a resource.
+
+        :param json_dict: A dict or str of a json resource.
+        """
         self._setup_to_validate()
         if isinstance(json_dict, str):
             try:
@@ -857,10 +892,10 @@ class ImageResourceValidator(BaseValidatorMixin):
 
     def _run_validation(self, canvas_uri=None, only_resource=False, **kwargs):
         self.canvas_uri = canvas_uri
-        self._check_all_key_constraints("ImageResource", self._json)
         if only_resource:
             return self._compare_dicts(self.ImageResourceSchema, self._json)
         else:
+            self._check_all_key_constraints("ImageResource", self._json)
             return self._compare_dicts(self.ImageSchema, self._json)
 
     def type_field(self, value):
@@ -891,7 +926,7 @@ class ImageResourceValidator(BaseValidatorMixin):
 
     def image_resource_field(self, value):
         """Validate image resources inside images list of Canvas"""
-        with self._with_path(self._path + ("resource",)):
+        with self._temp_path(self._path + ("resource",)):
             self._check_required_fields("ImageContent", value, ("@id",))
             if value.get('@type') == 'oa:Choice':
                 return self._compare_dicts(self.ImageResourceSchema, value['default'])
@@ -910,7 +945,7 @@ class ImageResourceValidator(BaseValidatorMixin):
         elif isinstance(value, list):
             return [self.resource_image_service_field(val) for val in value]
         else:
-            with self._with_path(self._path + ("service",)):
+            with self._temp_path(self._path + ("service",)):
                 self._check_required_fields("service", value, ("@context", "@id", "profile"))
                 self._check_recommended_fields("service", value, ("@id", "profile"))
                 return self._compare_dicts(self.ServiceSchema, value)
