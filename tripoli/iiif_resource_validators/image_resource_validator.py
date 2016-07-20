@@ -1,4 +1,5 @@
 import functools
+from collections import OrderedDict
 
 from tripoli.iiif_resource_validators.base_validator import BaseValidator
 
@@ -14,26 +15,26 @@ class ImageResourceValidator(BaseValidator):
     def __init__(self, iiif_validator):
         """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
-        self.ImageSchema = {
-            "@id": self.id_field,
-            '@type': self.type_field,
-            'motivation': self.motivation_field,
-            'resource': self.image_resource_field,
-            "on": self.on_field,
-            'height': self.height_field,
-            'width': self.width_field
-        }
-        self.ImageResourceSchema = {
-            '@id': self.id_field,
-            '@type': self.resource_type_field,
-            "service": self.resource_image_service_field
-        }
-        self.ServiceSchema = {
-            '@context': functools.partial(self._repeatable_uri_type, "@context"),
-            '@id': self.id_field,
-            'profile': self.service_profile_field,
-            'label': self.label_field
-        }
+        self.ImageSchema = OrderedDict((
+            ("@id", self.id_field),
+            ('@type', self.type_field),
+            ('motivation', self.motivation_field),
+            ("on", self.on_field),
+            ('height', self.height_field),
+            ('width', self.width_field),
+            ('resource', self.image_resource_field)
+        ))
+        self.ImageResourceSchema = OrderedDict((
+            ('@id', self.id_field),
+            ('@type', self.resource_type_field),
+            ('service', self.resource_image_service_field)
+        ))
+        self.ServiceSchema = OrderedDict((
+            ('@context', functools.partial(self._repeatable_uri_type, "@context")),
+            ('@id', self.id_field),
+            ('profile', self.service_profile_field),
+            ('label', self.label_field)
+        ))
 
         self.canvas_uri = None
 

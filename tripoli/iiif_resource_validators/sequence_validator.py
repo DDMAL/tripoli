@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from tripoli.iiif_resource_validators.base_validator import BaseValidator
 
 
@@ -14,21 +16,21 @@ class SequenceValidator(BaseValidator):
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
-        self.EmbSequenceSchema = {
-            '@type': self.type_field,
-            '@id': self.id_field,
-            'startCanvas': self.startCanvas_field,
-            'canvases': self.canvases_field,
-            'viewingDirection': self.viewing_dir_field,
-            'viewingHint': self.viewing_hint_field,
+        self.EmbSequenceSchema = OrderedDict((
+            ('@type', self.type_field),
+            ('@context', self._not_allowed),
+            ('@id', self.id_field),
+            ('startCanvas', self.startCanvas_field),
+            ('viewingDirection', self.viewing_dir_field),
+            ('viewingHint', self.viewing_hint_field),
+            ('canvases', self.canvases_field),
+        ))
 
-            '@context': self._not_allowed
-        }
-        self.LinkedSequenceSchema = {
-            '@type': self.type_field,
-            '@id': self.id_field,
-            'canvases': self._not_allowed
-        }
+        self.LinkedSequenceSchema = OrderedDict((
+            ('@type', self.type_field),
+            ('@id', self.id_field),
+            ('canvases', self._not_allowed)
+        ))
 
     def _run_validation(self, **kwargs):
         self._check_all_key_constraints("sequence", self._json)

@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from tripoli.iiif_resource_validators.base_validator import BaseValidator
 
 
@@ -19,11 +21,11 @@ class ManifestValidator(BaseValidator):
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
-        self.ManifestSchema = {
-            '@context': self.context_field,
-            'sequences': self.sequences_field,
-            'structures': self.structures_field
-        }
+        self.ManifestSchema = OrderedDict((
+            ('@context', self.context_field),
+            ('structures', self.structures_field),
+            ('sequences', self.sequences_field),
+        ))
 
     def _run_validation(self, **kwargs):
         self._check_all_key_constraints("manifest", self._json)

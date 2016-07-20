@@ -3,6 +3,7 @@ import functools
 import json
 import traceback
 import urllib.parse
+import copy
 
 from tripoli.mixins import LinkedValidatorMixin, SubValidationMixin
 from tripoli.logging import ValidatorLogError, ValidatorLogWarning
@@ -146,12 +147,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
         :param schema: A dict where each key maps to a function.
         :param value: A dict to validate against the schema."""
-        corrected = {}
-        for k, v in value.items():
-            if k in schema:
-                corrected[k] = schema[k](v)
-            else:
-                corrected[k] = v
+        corrected = copy.copy(value)
+        for key, fn in schema.items():
+            if key in value:
+                corrected[key] = fn(corrected[key])
         return corrected
 
     def _run_validation(self, **kwargs):
@@ -268,10 +267,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     def _check_all_key_constraints(self, resource, r_dict):
         """Call all key constraint checking methods."""
         self._check_common_fields(r_dict)
-        self._check_recommended_fields(resource, r_dict, self.RECOMMENDED_FIELDS)
-        self._check_unknown_fields(resource, r_dict, self.KNOWN_FIELDS)
         self._check_forbidden_fields(resource, r_dict, self.FORBIDDEN_FIELDS)
         self._check_required_fields(resource, r_dict, self.REQUIRED_FIELDS)
+        self._check_recommended_fields(resource, r_dict, self.RECOMMENDED_FIELDS)
+        self._check_unknown_fields(resource, r_dict, self.KNOWN_FIELDS)
 
     # Field definitions #
     def _optional(self, field, fn):

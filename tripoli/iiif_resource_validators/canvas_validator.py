@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from tripoli.iiif_resource_validators.base_validator import BaseValidator
 
 
@@ -13,16 +15,16 @@ class CanvasValidator(BaseValidator):
     def __init__(self, iiif_validator):
         """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
-        self.CanvasSchema = {
-            '@id': self.id_field,
-            '@type': self.type_field,
-            'label': self.label_field,
-            'height': self.height_field,
-            'width': self.width_field,
-            'viewingHint': self.viewing_hint_field,
-            'images': self.images_field,
-            'other_content': self.other_content_field
-        }
+        self.CanvasSchema = OrderedDict((
+            ('@id', self.id_field),
+            ('@type', self.type_field),
+            ('label', self.label_field),
+            ('height', self.height_field),
+            ('width', self.width_field),
+            ('viewingHint', self.viewing_hint_field),
+            ('other_content', self.other_content_field),
+            ('images', self.images_field)
+        ))
 
     def _run_validation(self, **kwargs):
         self.canvas_uri = self._json['@id']
