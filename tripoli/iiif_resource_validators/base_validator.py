@@ -110,6 +110,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         self._json = None
         self.is_valid = None
         self._errors = set()
+        self._warnings = set()
         self._path = path
 
     def _validate(self, json_dict, path=None, **kwargs):
