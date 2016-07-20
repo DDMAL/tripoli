@@ -8,10 +8,12 @@ from tripoli.iiif_resource_validators.base_validator import BaseValidator
 class TestBaseValidatorMixin(unittest.TestCase):
 
     def setUp(self):
-        self.base_validator = BaseValidator(IIIFValidator())
+        iv = IIIFValidator()
+        iv.fail_fast = False
+        self.base_validator = BaseValidator(iv)
 
     def has_error(self, error):
-        """Check if we have an error, or any error."""
+        """Check if a particular error was raised."""
         return error in self.base_validator._errors
 
     def has_errors(self):
