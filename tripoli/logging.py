@@ -2,7 +2,7 @@ import traceback
 
 
 class ValidatorLogEntry:
-    """Basic error logging lass with comparison behavior for hashing."""
+    """Basic error logging class with comparison behavior for hashing."""
 
     def __init__(self, msg, path, tb=None):
         self.msg = msg
