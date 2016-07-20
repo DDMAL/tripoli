@@ -17,6 +17,10 @@ class LinkedValidatorMixin:
         return self._IIIFValidator.debug
 
     @property
+    def fail_fast(self):
+        return self._IIIFValidator.fail_fast
+
+    @property
     def ManifestValidator(self):
         return self._IIIFValidator._ManifestValidator
 
@@ -72,12 +76,14 @@ class SubValidationMixin:
             - raise_warnings: bool to decide if warnings will be recorded
               or not.
         """
-        subschema._validate(value, path, **kwargs)
-        if subschema._errors:
-            self._errors = self._errors | subschema._errors
-        if subschema._warnings:
-            self._warnings = self._warnings | subschema._warnings
-        if subschema.corrected_doc:
-            return subschema.corrected_doc
-        else:
-            return subschema._json
+        try:
+            subschema._validate(value, path, **kwargs)
+        finally:
+            if subschema._errors:
+                self._errors = self._errors | subschema._errors
+            if subschema._warnings:
+                self._warnings = self._warnings | subschema._warnings
+            if subschema.corrected_doc:
+                return subschema.corrected_doc
+            else:
+                return subschema._json

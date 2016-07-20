@@ -6,6 +6,7 @@ import urllib.parse
 
 from tripoli.mixins import LinkedValidatorMixin, SubValidationMixin
 from tripoli.logging import ValidatorLogError, ValidatorLogWarning
+from tripoli.exceptions import FailFastException
 
 
 class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
@@ -124,15 +125,16 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             json_dict = json.loads(json_dict)
 
         self._json = json_dict
-        val = self._run_validation(**kwargs)
-        val = self._check_common_fields(val)
-        self._raise_additional_warnings(val)
-        self.corrected_doc = self.modify_final_return(val)
-
-        if self._errors:
-            self.is_valid = False
-        else:
-            self.is_valid = True
+        try:
+            val = self._run_validation(**kwargs)
+            val = self._check_common_fields(val)
+            self._raise_additional_warnings(val)
+            self.corrected_doc = self.modify_final_return(val)
+        finally:
+            if self._errors:
+                self.is_valid = False
+            else:
+                self.is_valid = True
 
     def _compare_dicts(self, schema, value):
         """Compare a schema to a dict.
@@ -196,6 +198,8 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         if self.collect_errors:
             tb = traceback.extract_stack()[:-1] if self.debug else None
             self._errors.add(ValidatorLogError(msg, self._path + (field,), tb))
+        if self.fail_fast:
+            raise FailFastException
 
     def _check_common_fields(self, val):
         """Validate fields that could appear on any resource."""

@@ -1,0 +1,2 @@
+class FailFastException(Exception):
+    pass

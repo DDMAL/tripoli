@@ -1,6 +1,7 @@
 import json
 import logging
 
+from tripoli.iiif_resource_validators.base_validator import FailFastException
 from tripoli.mixins import SubValidationMixin
 from tripoli.logging import ValidatorLogError
 from tripoli.iiif_resource_validators import *
@@ -17,6 +18,7 @@ class IIIFValidator(SubValidationMixin):
         self.debug = False
         self.collect_warnings = True
         self.collect_errors = True
+        self.fail_fast = True
         self._setup_to_validate()
 
     @property
@@ -106,7 +108,9 @@ class IIIFValidator(SubValidationMixin):
         if not validator:
             self._errors.add(ValidatorLogError("Unknown @type: '{}'".format(doc_type), tuple()))
             self.is_valid = False
-
-        self._sub_validate(validator, json_dict, path=None, **kwargs)
+        try:
+            self._sub_validate(validator, json_dict, path=None, **kwargs)
+        except FailFastException:
+            pass
         self._set_from_sub(validator)
         self._output_logging()
