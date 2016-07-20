@@ -6,7 +6,8 @@ import traceback
 
 
 class ValidatorLogEntry:
-    """Basic error class with comparison behavior for hashing."""
+    """Basic error logging lass with comparison behavior for hashing."""
+
     def __init__(self, msg, path, tb=None):
         self.msg = msg
         self.path = path
@@ -27,6 +28,7 @@ class ValidatorLogEntry:
 
 class ValidatorLogWarning(ValidatorLogEntry):
     """Class to hold and present warnings."""
+
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
         output = "Warning: {}".format(self.msg)
@@ -38,6 +40,7 @@ class ValidatorLogWarning(ValidatorLogEntry):
 
 class ValidatorLogError(ValidatorLogEntry):
     """Class to hold and present errors."""
+
     def __str__(self):
         path = ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
         output = "Error: {}".format(self.msg)
@@ -48,40 +51,22 @@ class ValidatorLogError(ValidatorLogEntry):
 
 
 class LinkedValidatorMixin:
-    """Basic support for a linked set of validators with common interfaces."""
-    def __init__(self, iiif_validator=None):
-        self._errors = set()
-        self._warnings = set()
-        self.is_valid = None
-        self._IIIFValidator = iiif_validator
+    """Basic support for storing 'global' references in a single administrative class."""
 
-        self._collect_warnings = True
-        self._collect_errors = True
-        self._debug = True
+    def __init__(self, iiif_validator=None):
+        self._IIIFValidator = iiif_validator
 
     @property
     def collect_warnings(self):
-        return self._IIIFValidator._collect_warnings
-
-    @collect_warnings.setter
-    def collect_warnings(self, value):
-        self._IIIFValidator._collect_warnings = value
+        return self._IIIFValidator.collect_warnings
 
     @property
     def collect_errors(self):
-        return self._IIIFValidator._collect_errors
-
-    @collect_errors.setter
-    def collect_errors(self, value):
-        self._IIIFValidator._collect_errors= value
+        return self._IIIFValidator.collect_errors
 
     @property
     def debug(self):
-        return self._IIIFValidator._debug
-
-    @debug.setter
-    def debug(self, value):
-        self._IIIFValidator._debug = value
+        return self._IIIFValidator.debug
 
     @property
     def ManifestValidator(self):
@@ -99,21 +84,14 @@ class LinkedValidatorMixin:
     def ImageResourceValidator(self):
         return self._IIIFValidator._ImageResourceValidator
 
-    @ManifestValidator.setter
-    def ManifestValidator(self, value):
-        self._IIIFValidator._ManifestValidator = value(self._IIIFValidator)
 
-    @SequenceValidator.setter
-    def SequenceValidator(self, value):
-        self._IIIFValidator._SequenceValidator = value(self._IIIFValidator)
+class SubValidationMixin:
+    """Provides needed parts to accumulate errors and delegate validation."""
 
-    @CanvasValidator.setter
-    def CanvasValidator(self, value):
-        self._IIIFValidator._CanvasValidator = value(self._IIIFValidator)
-
-    @ImageResourceValidator.setter
-    def ImageResourceValidator(self, value):
-        self._IIIFValidator._ImageResourceValidator = value(self._IIIFValidator)
+    def __init__(self):
+        self._errors = set()
+        self._warnings = set()
+        self.is_valid = None
 
     @property
     def errors(self):
@@ -136,7 +114,7 @@ class LinkedValidatorMixin:
     def _sub_validate(self, subschema, value, path, **kwargs):
         """Validate a field using another Validator.
 
-        :param subschema: A BaseValidatorMixin implementing object.
+        :param subschema: A BaseValidator implementing object.
         :param value (dict): The data to be validated.
         :param path (tuple): The path where the above data exists.
             Example: ('sequences', 'canvases') for the CanvasValidator.
@@ -157,7 +135,7 @@ class LinkedValidatorMixin:
             return subschema._json
 
 
-class BaseValidatorMixin(LinkedValidatorMixin):
+class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     """Defines basic validation behaviour and expected attributes
     of any IIIF validators that inherit from it."""
 
@@ -177,25 +155,26 @@ class BaseValidatorMixin(LinkedValidatorMixin):
 
     def __init__(self, iiif_validator=None):
         """You should NOT override ___init___. Override setup() instead."""
-        super().__init__(iiif_validator=iiif_validator)
+        LinkedValidatorMixin.__init__(self, iiif_validator=iiif_validator)
+        SubValidationMixin.__init__(self)
         self._path = tuple()
         self._json = None
         self.corrected_doc = None
-        self._LangValPairs = None
 
         self._LangValPairs = {
-                '@language': functools.partial(self._repeatable_string_type, "@language"),
-                '@value': functools.partial(self._repeatable_string_type, "@value")
-            }
+            '@language': functools.partial(self._repeatable_string_type, "@language"),
+            '@value': functools.partial(self._repeatable_string_type, "@value")
+        }
 
         self._MetadataItemSchema = {
-                'label': functools.partial(self._str_or_val_lang_type, "label"),
-                'value': functools.partial(self._str_or_val_lang_type, "value")
-            }
+            'label': functools.partial(self._str_or_val_lang_type, "label"),
+            'value': functools.partial(self._str_or_val_lang_type, "value")
+        }
 
     @staticmethod
     def errors_to_warnings(fn):
         """Cast any errors to warnings on any *_field or *_type function."""
+
         def coerce_errors(*args, **kwargs):
             self = args[0]
             old_errors = set(self.errors)
@@ -206,11 +185,13 @@ class BaseValidatorMixin(LinkedValidatorMixin):
                 self._log_warning(err.path[-1], "(error coerced to warning) {}".format(err.msg))
             self._errors = old_errors
             return val
+
         return coerce_errors
 
     @staticmethod
     def warnings_to_errors(fn):
         """Cast any warnings to errors on any *_field or *_type function"""
+
         def coerce_warnings(*args, **kwargs):
             self = args[0]
             old_warnings = set(self.warnings)
@@ -221,6 +202,7 @@ class BaseValidatorMixin(LinkedValidatorMixin):
                 self._log_error(err.path[-1], "(warning coerced to error) {}".format(err.msg))
             self._warnings = old_warnings
             return val
+
         return coerce_warnings
 
     @contextlib.contextmanager
@@ -256,7 +238,7 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         self._errors = set()
         self._path = path
 
-    def _validate(self, json_dict, path=None,  **kwargs):
+    def _validate(self, json_dict, path=None, **kwargs):
         """Entry point for callers to validate a chunk of data."""
 
         # Reset the validator object constants.
@@ -328,8 +310,10 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         :param field: The field the warning was raised on.
         :param msg: The message to associate with the warning.
         """
-        tb = traceback.extract_stack()[:-1] if self.debug else None
+        import pdb
+        pdb.set_trace()
         if self.collect_warnings:
+            tb = traceback.extract_stack()[:-1] if self.debug else None
             self._warnings.add(ValidatorLogWarning(msg, self._path + (field,), tb))
 
     def log_error(self, field, msg):
@@ -338,26 +322,26 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         :param field: The field the error was raised on.
         :param msg: The message to associate with the error.
         """
-        tb = traceback.extract_stack()[:-1] if self.debug else None
         if self.collect_errors:
+            tb = traceback.extract_stack()[:-1] if self.debug else None
             self._errors.add(ValidatorLogError(msg, self._path + (field,), tb))
 
     def _check_common_fields(self, val):
         """Validate fields that could appear on any resource."""
         common_fields = {
-                "label": self.label_field,
-                "metadata": self.metadata_field,
-                "description:": self.description_field,
-                "thumbnail": self.thumbnail_field,
-                "logo": self.logo_field,
-                "attribution": self.attribution_field,
-                "@type": self.type_field,
-                "license": self.license_field,
-                "related": self.related_field,
-                "rendering": self.rendering_field,
-                "service": self.service_field,
-                "seeAlso": self.seeAlso_field,
-                "within": self.within_field,
+            "label": self.label_field,
+            "metadata": self.metadata_field,
+            "description:": self.description_field,
+            "thumbnail": self.thumbnail_field,
+            "logo": self.logo_field,
+            "attribution": self.attribution_field,
+            "@type": self.type_field,
+            "license": self.license_field,
+            "related": self.related_field,
+            "rendering": self.rendering_field,
+            "service": self.service_field,
+            "seeAlso": self.seeAlso_field,
+            "within": self.within_field,
         }
         return self._compare_dicts(common_fields, val)
 
@@ -416,11 +400,13 @@ class BaseValidatorMixin(LinkedValidatorMixin):
     # Field definitions #
     def _optional(self, field, fn):
         """Wrap a function to make its value optional (null and '' allows)"""
+
         def new_fn(*args):
             if args[0] == "" or args[0] is None:
                 self.log_warning(field, "'{}' field should not be included if it is empty.".format(field))
                 return args[0]
             return fn(*args)
+
         return new_fn
 
     def _not_allowed(self, field, value):
@@ -631,18 +617,49 @@ class BaseValidatorMixin(LinkedValidatorMixin):
         return value
 
 
-class IIIFValidator(LinkedValidatorMixin):
-
+class IIIFValidator(SubValidationMixin):
     def __init__(self):
-        super().__init__(iiif_validator=self)
+        super().__init__()
         self._ManifestValidator = None
         self._ImageResourceValidator = None
         self._CanvasValidator = None
         self._SequenceValidator = None
-        self._debug = True
-        self._collect_warnings = True
-        self._collect_errors = True
+        self.debug = False
+        self.collect_warnings = True
+        self.collect_errors = True
         self._setup_to_validate()
+
+    @property
+    def ManifestValidator(self):
+        return self._ManifestValidator
+
+    @property
+    def SequenceValidator(self):
+        return self._SequenceValidator
+
+    @property
+    def CanvasValidator(self):
+        return self._CanvasValidator
+
+    @property
+    def ImageResourceValidator(self):
+        return self._ImageResourceValidator
+
+    @ManifestValidator.setter
+    def ManifestValidator(self, value):
+        self._ManifestValidator = value(self)
+
+    @SequenceValidator.setter
+    def SequenceValidator(self, value):
+        self._SequenceValidator = value(self)
+
+    @CanvasValidator.setter
+    def CanvasValidator(self, value):
+        self._CanvasValidator = value(self)
+
+    @ImageResourceValidator.setter
+    def ImageResourceValidator(self, value):
+        self._ImageResourceValidator = value(self)
 
     def _setup_to_validate(self):
         """Make sure all links to sub validators exist."""
@@ -669,7 +686,7 @@ class IIIFValidator(LinkedValidatorMixin):
 
         Called after sub_validate'ing with validator sub.
 
-        :param sub: A BaseValidatorMixin implementing Validator.
+        :param sub: A BaseValidator implementing Validator.
         """
         self.is_valid = sub.is_valid
         self.corrected_doc = sub.corrected_doc
@@ -697,7 +714,7 @@ class IIIFValidator(LinkedValidatorMixin):
         self._set_from_sub(validator)
 
 
-class ManifestValidator(BaseValidatorMixin):
+class ManifestValidator(BaseValidator):
     PRESENTATION_API_URI = "http://iiif.io/api/presentation/2/context.json"
     IMAGE_API_1 = "http://library.stanford.edu/iiif/image-api/1.1/context.json"
     IMAGE_API_2 = "http://iiif.io/api/image/2/context.json"
@@ -706,7 +723,7 @@ class ManifestValidator(BaseValidatorMixin):
                  'top-to-bottom', 'bottom-to-top']
     VIEW_HINTS = ['individuals', 'paged', 'continuous']
 
-    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"viewingDirection", "navDate", "sequences", "structures", "@context"}
+    KNOWN_FIELDS = BaseValidator.COMMON_FIELDS | {"viewingDirection", "navDate", "sequences", "structures", "@context"}
     FORBIDDEN_FIELDS = {"format", "height", "width", "startCanvas", "first", "last", "total", "next", "prev",
                         "startIndex", "collections", "manifests", "members", "canvases", "resources", "otherContent",
                         "images", "ranges"}
@@ -756,12 +773,12 @@ class ManifestValidator(BaseValidatorMixin):
         return lst
 
 
-class SequenceValidator(BaseValidatorMixin):
+class SequenceValidator(BaseValidator):
     VIEW_DIRS = {'left-to-right', 'right-to-left',
                  'top-to-bottom', 'bottom-to-top'}
     VIEW_HINTS = {'individuals', 'paged', 'continuous'}
 
-    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"viewingDirection", "startCanvas", "canvases"}
+    KNOWN_FIELDS = BaseValidator.COMMON_FIELDS | {"viewingDirection", "startCanvas", "canvases"}
     FORBIDDEN_FIELDS = {"format", "height", "width", "navDate", "first", "last", "total", "next", "prev",
                         "startIndex", "collections", "manifests", "sequences", "structures", "resources",
                         "otherContent", "images", "ranges"}
@@ -770,20 +787,20 @@ class SequenceValidator(BaseValidatorMixin):
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
         self.EmbSequenceSchema = {
-                '@type': self.type_field,
-                '@id': self.id_field,
-                'startCanvas': self.startCanvas_field,
-                'canvases': self.canvases_field,
-                'viewingDirection': self.viewing_dir_field,
-                'viewingHint': self.viewing_hint_field,
+            '@type': self.type_field,
+            '@id': self.id_field,
+            'startCanvas': self.startCanvas_field,
+            'canvases': self.canvases_field,
+            'viewingDirection': self.viewing_dir_field,
+            'viewingHint': self.viewing_hint_field,
 
-                '@context': self._not_allowed
-            }
+            '@context': self._not_allowed
+        }
         self.LinkedSequenceSchema = {
-                '@type': self.type_field,
-                '@id': self.id_field,
-                'canvases': self._not_allowed
-            }
+            '@type': self.type_field,
+            '@id': self.id_field,
+            'canvases': self._not_allowed
+        }
 
     def _run_validation(self, **kwargs):
         self._check_all_key_constraints("sequence", self._json)
@@ -818,10 +835,10 @@ class SequenceValidator(BaseValidatorMixin):
         return [self._sub_validate(self.CanvasValidator, c, path) for c in value]
 
 
-class CanvasValidator(BaseValidatorMixin):
+class CanvasValidator(BaseValidator):
     VIEW_HINTS = {'non-paged', 'facing-pages'}
 
-    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"height", "width", "otherContent", "images"}
+    KNOWN_FIELDS = BaseValidator.COMMON_FIELDS | {"height", "width", "otherContent", "images"}
     FORBIDDEN_FIELDS = {"format", "viewingDirection", "navDate", "startCanvas", "first", "last", "total",
                         "next", "prev", "startIndex", "collections", "manifests", "members", "sequences",
                         "structures", "canvases", "resources", "ranges"}
@@ -831,15 +848,15 @@ class CanvasValidator(BaseValidatorMixin):
         """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
         self.CanvasSchema = {
-                '@id': self.id_field,
-                '@type': self.type_field,
-                'label': self.label_field,
-                'height': self.height_field,
-                'width': self.width_field,
-                'viewingHint': self.viewing_hint_field,
-                'images': self.images_field,
-                'other_content': self.other_content_field
-            }
+            '@id': self.id_field,
+            '@type': self.type_field,
+            'label': self.label_field,
+            'height': self.height_field,
+            'width': self.width_field,
+            'viewingHint': self.viewing_hint_field,
+            'images': self.images_field,
+            'other_content': self.other_content_field
+        }
 
     def _run_validation(self, **kwargs):
         self.canvas_uri = self._json['@id']
@@ -884,9 +901,8 @@ class CanvasValidator(BaseValidatorMixin):
         return [self._uri_type("otherContent", item['@id']) for item in value]
 
 
-class ImageResourceValidator(BaseValidatorMixin):
-
-    KNOWN_FIELDS = BaseValidatorMixin.COMMON_FIELDS | {"motivation", "resource", "on"}
+class ImageResourceValidator(BaseValidator):
+    KNOWN_FIELDS = BaseValidator.COMMON_FIELDS | {"motivation", "resource", "on"}
     FORBIDDEN_FIELDS = {"format", "height", "width", "viewingDirection", "navDate", "startCanvas", "first",
                         "last", "total", "next", "prev", "startIndex", "collections", "manifests", "members",
                         "sequences", "structures", "canvases", "resources", "otherContent", "images", "ranges"}
