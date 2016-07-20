@@ -72,6 +72,7 @@ class IIIFValidator(SubValidationMixin):
         }
         self._errors = set()
         self._warnings = set()
+        self.corrected_doc = {}
 
     def _set_from_sub(self, sub):
         """Set the validation attributes to those of a sub_validator.
