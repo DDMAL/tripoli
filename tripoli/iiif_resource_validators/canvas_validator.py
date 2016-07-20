@@ -13,7 +13,6 @@ class CanvasValidator(BaseValidator):
     REQUIRED_FIELDS = {"label", "@id", "@type", "height", "width"}
 
     def __init__(self, iiif_validator):
-        """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
         self.CanvasSchema = OrderedDict((
             ('@id', self.id_field),

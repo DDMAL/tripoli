@@ -13,7 +13,6 @@ class ImageResourceValidator(BaseValidator):
     RECOMMENDED_FIELDS = {"@id"}
 
     def __init__(self, iiif_validator):
-        """You should not override ___init___. Override setup() instead."""
         super().__init__(iiif_validator)
         self.ImageSchema = OrderedDict((
             ("@id", self.id_field),

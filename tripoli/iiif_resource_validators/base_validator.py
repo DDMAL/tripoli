@@ -29,7 +29,6 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     }
 
     def __init__(self, iiif_validator=None):
-        """You should NOT override ___init___. Override setup() instead."""
         LinkedValidatorMixin.__init__(self, iiif_validator=iiif_validator)
         SubValidationMixin.__init__(self)
         self._path = tuple()
@@ -488,5 +487,5 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     def viewing_dir_field(self, value):
         """Validate against VIEW_DIRS list."""
         if value not in self.VIEW_DIRS:
-            raise self.log_error("viewingDirection", "viewingDirection '{}' is not valid and not uri.".format(value))
+            self.log_error("viewingDirection", "viewingDirection '{}' is not valid and not uri.".format(value))
         return value
