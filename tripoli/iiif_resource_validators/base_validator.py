@@ -16,6 +16,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     PRESENTATION_API_URI = "http://iiif.io/api/presentation/2/context.json"
     IMAGE_API_2 = "http://iiif.io/api/image/2/context.json"
+    IMAGE_API_1 = "http://iiif.io/api/image/1/context.json"
 
     """The following constants will be iterated through and have their
     values checked on every validation to produce warnings and errors

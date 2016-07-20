@@ -12,7 +12,6 @@ class ImageContentValidator(BaseValidator):
     REQUIRED_FIELDS = {'@type'}
     RECOMMENDED_FIELDS = {'@id', 'profile'}
 
-
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
         self.ImageContentSchema = OrderedDict((
@@ -46,5 +45,10 @@ class ImageContentValidator(BaseValidator):
         with self._temp_path(self._path + ('service',)):
             self._check_required_fields("image", value, ['@id', '@context'])
             self._check_recommended_fields("image", value, ['profile'])
-            if value.get("@context") != self.IMAGE_API_2:
-                self.log_error('@context', "Must reference IIIF image API.")
+            context = value.get("@context")
+            if context != self.IMAGE_API_2:
+                if context != self.IMAGE_API_1:
+                    self.log_error('@context', "Must reference IIIF image API.")
+                else:
+                    self.log_warning('@context', "SHOULD upgrade to 2.0 IIIF image service.")
+            return value
