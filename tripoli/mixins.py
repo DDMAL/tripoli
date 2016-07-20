@@ -33,8 +33,12 @@ class LinkedValidatorMixin:
         return self._IIIFValidator._CanvasValidator
 
     @property
-    def ImageResourceValidator(self):
-        return self._IIIFValidator._ImageResourceValidator
+    def AnnotationValidator(self):
+        return self._IIIFValidator._AnnotationValidator
+
+    @property
+    def ImageContentValidator(self):
+        return self._IIIFValidator._ImageContentValidator
 
 
 class SubValidationMixin:

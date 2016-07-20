@@ -27,7 +27,7 @@ class CanvasValidator(BaseValidator):
 
     def _run_validation(self, **kwargs):
         self.canvas_uri = self._json['@id']
-        self._check_all_key_constraints("Canvas", self._json)
+        self._check_all_key_constraints("canvas", self._json)
         return self._compare_dicts(self.CanvasSchema, self._json)
 
     def _raise_additional_warnings(self, validation_results):
@@ -53,7 +53,7 @@ class CanvasValidator(BaseValidator):
     def images_field(self, value):
         if isinstance(value, list):
             path = self._path + ("images",)
-            return [self._sub_validate(self.ImageResourceValidator, i, path,
+            return [self._sub_validate(self.AnnotationValidator, i, path,
                                        canvas_uri=self.canvas_uri) for i in value]
         if not value:
             self.log_warning("images", "'images' SHOULD have values.")

@@ -1,4 +1,5 @@
 from tripoli.iiif_resource_validators.canvas_validator import CanvasValidator
-from tripoli.iiif_resource_validators.image_resource_validator import ImageResourceValidator
+from tripoli.iiif_resource_validators.annotation_validator import AnnotationValidator
 from tripoli.iiif_resource_validators.manifest_validator import ManifestValidator
 from tripoli.iiif_resource_validators.sequence_validator import SequenceValidator
+from tripoli.iiif_resource_validators.image_content_validator import ImageContentValidator

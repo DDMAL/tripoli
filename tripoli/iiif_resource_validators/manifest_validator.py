@@ -4,10 +4,6 @@ from tripoli.iiif_resource_validators.base_validator import BaseValidator
 
 
 class ManifestValidator(BaseValidator):
-    PRESENTATION_API_URI = "http://iiif.io/api/presentation/2/context.json"
-    IMAGE_API_1 = "http://library.stanford.edu/iiif/image-api/1.1/context.json"
-    IMAGE_API_2 = "http://iiif.io/api/image/2/context.json"
-
     VIEW_DIRS = ['left-to-right', 'right-to-left',
                  'top-to-bottom', 'bottom-to-top']
     VIEW_HINTS = ['individuals', 'paged', 'continuous']

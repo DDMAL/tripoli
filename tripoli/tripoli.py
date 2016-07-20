@@ -4,16 +4,19 @@ import logging
 from tripoli.iiif_resource_validators.base_validator import FailFastException
 from tripoli.mixins import SubValidationMixin
 from tripoli.logging import ValidatorLogError
-from tripoli.iiif_resource_validators import *
+from tripoli.iiif_resource_validators import (
+    ManifestValidator, SequenceValidator, CanvasValidator,
+    ImageContentValidator, AnnotationValidator)
 
 
 class IIIFValidator(SubValidationMixin):
     def __init__(self):
         super().__init__()
         self._ManifestValidator = None
-        self._ImageResourceValidator = None
+        self._AnnotationValidator = None
         self._CanvasValidator = None
         self._SequenceValidator = None
+        self._ImageContentValidator = None
         self.logger = logging.getLogger("tripoli")
         self.debug = False
         self.collect_warnings = True
@@ -34,8 +37,12 @@ class IIIFValidator(SubValidationMixin):
         return self._CanvasValidator
 
     @property
-    def ImageResourceValidator(self):
-        return self._ImageResourceValidator
+    def AnnotationValidator(self):
+        return self._AnnotationValidator
+
+    @property
+    def ImageContentValidator(self):
+        return self._ImageContentValidator
 
     @ManifestValidator.setter
     def ManifestValidator(self, value):
@@ -49,26 +56,32 @@ class IIIFValidator(SubValidationMixin):
     def CanvasValidator(self, value):
         self._CanvasValidator = value(self)
 
-    @ImageResourceValidator.setter
-    def ImageResourceValidator(self, value):
-        self._ImageResourceValidator = value(self)
+    @AnnotationValidator.setter
+    def AnnotationValidator(self, value):
+        self._AnnotationValidator = value(self)
+
+    @ImageContentValidator.setter
+    def ImageContentValidator(self, value):
+        self._ImageContentValidator = value(self)
 
     def _setup_to_validate(self):
         """Make sure all links to sub validators exist."""
         if not self._ManifestValidator:
             self._ManifestValidator = ManifestValidator(self)
-        if not self._ImageResourceValidator:
-            self._ImageResourceValidator = ImageResourceValidator(self)
+        if not self._AnnotationValidator:
+            self._AnnotationValidator = AnnotationValidator(self)
         if not self._CanvasValidator:
             self._CanvasValidator = CanvasValidator(self)
         if not self._SequenceValidator:
             self._SequenceValidator = SequenceValidator(self)
+        if not self._ImageContentValidator:
+            self._ImageContentValidator = ImageContentValidator(self)
 
         self._TYPE_MAP = {
             "sc:Manifest": self._ManifestValidator,
             "sc:Sequence": self._SequenceValidator,
             "sc:Canvas": self._CanvasValidator,
-            "oa:Annotation": self._ImageResourceValidator
+            "oa:Annotation": self._AnnotationValidator
         }
         self._errors = set()
         self._warnings = set()

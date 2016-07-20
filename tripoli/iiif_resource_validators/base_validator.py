@@ -14,6 +14,9 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     """Defines basic validation behaviour and expected attributes
     of any IIIF validators that inherit from it."""
 
+    PRESENTATION_API_URI = "http://iiif.io/api/presentation/2/context.json"
+    IMAGE_API_2 = "http://iiif.io/api/image/2/context.json"
+
     """The following constants will be iterated through and have their
     values checked on every validation to produce warnings and errors
     based on key constraints. Each inheritor should define these."""
@@ -265,11 +268,12 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     def _check_all_key_constraints(self, resource, r_dict):
         """Call all key constraint checking methods."""
-        self._check_common_fields(r_dict)
         self._check_forbidden_fields(resource, r_dict, self.FORBIDDEN_FIELDS)
         self._check_required_fields(resource, r_dict, self.REQUIRED_FIELDS)
         self._check_recommended_fields(resource, r_dict, self.RECOMMENDED_FIELDS)
         self._check_unknown_fields(resource, r_dict, self.KNOWN_FIELDS)
+        return self._check_common_fields(r_dict)
+
 
     # Field definitions #
     def _optional(self, field, fn):
@@ -468,7 +472,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             path = self._path + (field,)
             service = value.get("service")
             if service and service.get("@context") == "http://iiif.io/api/image/2/context.json":
-                return self._sub_validate(self.ImageResourceValidator, service, path,
+                return self._sub_validate(self.AnnotationValidator, service, path,
                                           only_resource=True)
             else:
                 val = self._uri_type(field, value)

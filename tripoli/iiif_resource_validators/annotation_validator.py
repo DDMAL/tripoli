@@ -4,7 +4,7 @@ from collections import OrderedDict
 from tripoli.iiif_resource_validators.base_validator import BaseValidator
 
 
-class ImageResourceValidator(BaseValidator):
+class AnnotationValidator(BaseValidator):
     KNOWN_FIELDS = BaseValidator.COMMON_FIELDS | {"motivation", "resource", "on"}
     FORBIDDEN_FIELDS = {"format", "height", "width", "viewingDirection", "navDate", "startCanvas", "first",
                         "last", "total", "next", "prev", "startIndex", "collections", "manifests", "members",
@@ -21,7 +21,7 @@ class ImageResourceValidator(BaseValidator):
             ("on", self.on_field),
             ('height', self.height_field),
             ('width', self.width_field),
-            ('resource', self.image_resource_field)
+            ('resource', self.resource_field)
         ))
         self.ImageResourceSchema = OrderedDict((
             ('@id', self.id_field),
@@ -45,7 +45,7 @@ class ImageResourceValidator(BaseValidator):
         if only_resource:
             return self._compare_dicts(self.ImageResourceSchema, self._json)
         else:
-            self._check_all_key_constraints("ImageResource", self._json)
+            self._check_all_key_constraints("annotation", self._json)
             return self._compare_dicts(self.ImageSchema, self._json)
 
     def type_field(self, value):
@@ -74,13 +74,10 @@ class ImageResourceValidator(BaseValidator):
             self.log_error("on", "'on' must reference the canvas URI.")
         return value
 
-    def image_resource_field(self, value):
+    def resource_field(self, value):
         """Validate image resources inside images list of Canvas"""
-        with self._temp_path(self._path + ("resource",)):
-            self._check_required_fields("ImageContent", value, ("@id",))
-            if value.get('@type') == 'oa:Choice':
-                return self._compare_dicts(self.ImageResourceSchema, value['default'])
-            return self._compare_dicts(self.ImageResourceSchema, value)
+        path = self._path + ("resource", )
+        return self._sub_validate(self.ImageContentValidator, value, path)
 
     def resource_type_field(self, value):
         """Validate the '@type' field of an Image Resource."""
