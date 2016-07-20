@@ -1,4 +1,5 @@
 import json
+import logging
 
 from tripoli.mixins import SubValidationMixin
 from tripoli.logging import ValidatorLogError
@@ -12,6 +13,7 @@ class IIIFValidator(SubValidationMixin):
         self._ImageResourceValidator = None
         self._CanvasValidator = None
         self._SequenceValidator = None
+        self.logger = logging.getLogger("tripoli")
         self.debug = False
         self.collect_warnings = True
         self.collect_errors = True
@@ -79,6 +81,13 @@ class IIIFValidator(SubValidationMixin):
         self.is_valid = sub.is_valid
         self.corrected_doc = sub.corrected_doc
 
+    def _output_logging(self):
+        """Sends errors and warnings to the logger."""
+        for err in self.errors:
+            self.logger.error(err.log_str())
+        for warn in self.warnings:
+            self.logger.warning(warn.log_str())
+
     def validate(self, json_dict, **kwargs):
         """Determine the correct validator and validate a resource.
 
@@ -100,3 +109,4 @@ class IIIFValidator(SubValidationMixin):
 
         self._sub_validate(validator, json_dict, path=None, **kwargs)
         self._set_from_sub(validator)
+        self._output_logging()
