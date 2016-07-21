@@ -1,2 +1,2 @@
-from .tripoli import IIIFValidator, AnnotationValidator, \
+from tripoli.tripoli import IIIFValidator, AnnotationValidator, \
     ManifestValidator, CanvasValidator, SequenceValidator
