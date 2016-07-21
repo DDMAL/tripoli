@@ -1,10 +1,10 @@
 import json
 import logging
 
-from tripoli.exceptions import FailFastException
-from tripoli.mixins import SubValidationMixin
-from tripoli.validator_logging import ValidatorLogError
-from tripoli.iiif_resource_validators import (
+from .exceptions import FailFastException
+from .mixins import SubValidationMixin
+from .validator_logging import ValidatorLogError
+from .iiif_resource_validators import (
     ManifestValidator, SequenceValidator, CanvasValidator,
     ImageContentValidator, AnnotationValidator)
 

@@ -5,9 +5,9 @@ import traceback
 import urllib.parse
 import copy
 
-from tripoli.mixins import LinkedValidatorMixin, SubValidationMixin
-from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning
-from tripoli.exceptions import FailFastException
+from ..mixins import LinkedValidatorMixin, SubValidationMixin
+from ..validator_logging import ValidatorLogError, ValidatorLogWarning
+from ..exceptions import FailFastException
 
 
 class BaseValidator(LinkedValidatorMixin, SubValidationMixin):

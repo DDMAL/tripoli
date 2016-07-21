@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from tripoli.iiif_resource_validators.base_validator import BaseValidator
+from .base_validator import BaseValidator
 
 
 class SequenceValidator(BaseValidator):
