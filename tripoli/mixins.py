@@ -2,6 +2,7 @@ class LinkedValidatorMixin:
     """Basic support for storing 'global' references in a single administrative class."""
 
     def __init__(self, iiif_validator=None):
+        #: The IIIFValidator containing this validator.
         self._IIIFValidator = iiif_validator
 
     @property
@@ -51,19 +52,21 @@ class SubValidationMixin:
 
     @property
     def errors(self):
+        """A list of ValidatorLogError from the previous call to validate()."""
         return list(self._errors)
 
     @property
     def warnings(self):
+        """A list of ValidatorLogWarnings from the previous call to validate()."""
         return list(self._warnings)
 
     def print_errors(self):
-        """Print the errors in a nice format."""
+        """Print accumulated errors in a nice format."""
         for err in self._errors:
             print(err)
 
     def print_warnings(self):
-        """Print the warnings in a nice format."""
+        """Print accumulated warnings in a nice format."""
         for warn in self._warnings:
             print(warn)
 

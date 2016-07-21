@@ -6,7 +6,7 @@ import urllib.parse
 import copy
 
 from tripoli.mixins import LinkedValidatorMixin, SubValidationMixin
-from tripoli.logging import ValidatorLogError, ValidatorLogWarning
+from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning
 from tripoli.exceptions import FailFastException
 
 
@@ -18,15 +18,29 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     IMAGE_API_2 = "http://iiif.io/api/image/2/context.json"
     IMAGE_API_1 = "http://iiif.io/api/image/1/context.json"
 
-    """The following constants will be iterated through and have their
-    values checked on every validation to produce warnings and errors
-    based on key constraints. Each inheritor should define these."""
+    # The following constants will be iterated through and have their
+    # values checked on every validation to produce warnings and errors
+    # based on key constraints. Each inheritor should define these.
+
+    #: The fields which may appear on this resource.
     KNOWN_FIELDS = {}
+
+    #: The fields which are forbidden on this resource.
     FORBIDDEN_FIELDS = {}
+
+    #: The fields which are required on this resource.
     REQUIRED_FIELDS = {}
+
+    #: The fields which are recommended on this resource.
     RECOMMENDED_FIELDS = {}
+
+    # The set of acceptable viewHints on this resource.
     VIEW_HINTS = {}
+
+    # The set of acceptable viewDirections on this resource.
     VIEW_DIRS = {}
+
+    # The set of fields which may appear on _any_ resource.
     COMMON_FIELDS = {
         "label", "metadata", "description", "thumbnail", "attribution", "license", "logo",
         "@id", "@type", "viewingHint", "seeAlso", "service", "related", "rendering", "within"
@@ -56,7 +70,12 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         def coerce_errors(*args, **kwargs):
             self = args[0]
             old_errors = set(self.errors)
-            val = fn(*args, **kwargs)
+            old_fail_fast = self.fail_fast
+            try:
+                self._IIIFValidator.fail_fast = False
+                val = fn(*args, **kwargs)
+            finally:
+                self._IIIFValidator.fail_fast = old_fail_fast
             new_errors = set(self.errors)
             diff = new_errors - old_errors
             for err in diff:
@@ -99,12 +118,21 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         finally:
             self._path = old_path
 
-    def _catch_errors(self, fn, *args, **kwargs):
+    def catch_errors(self, fn, *args, **kwargs):
         """Run given function and catch any of the errors it logged.
 
-        The self._errors key will not be changed by using this function."""
+        The self._errors key will not be changed by using this function.
+
+        The fail_fast option is temporarily set to false while the function
+        is run.
+        """
         errors = set(self._errors)
-        val = fn(*args, **kwargs)
+        old_fail_fast = self.fail_fast
+        try:
+            self._IIIFValidator.fail_fast = False
+            val = fn(*args, **kwargs)
+        finally:
+            self._IIIFValidator.fail_fast = old_fail_fast
         diff = self._errors - errors
         self._errors = errors
         return val, diff
@@ -484,7 +512,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     def viewing_hint_field(self, value):
         if value not in self.VIEW_HINTS:
-            val, errors = self._catch_errors(self._uri_type, "viewingHint", value)
+            val, errors = self.catch_errors(self._uri_type, "viewingHint", value)
             if errors:
                 self.log_error("viewingHint", "viewingHint '{}' is not valid and not uri.".format(value))
         return value

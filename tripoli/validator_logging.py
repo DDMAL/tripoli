@@ -5,11 +5,23 @@ class ValidatorLogEntry:
     """Basic error logging class with comparison behavior for hashing."""
 
     def __init__(self, msg, path, tb=None):
+        """
+
+        :param msg: A message associated with the log entry.
+        :param path: A tuple representing the path where entry was logged.
+        :param tb: A traceback.extract_stack() list from the point entry was logged.
+        """
+
+        #: A message associated with the log entry.
         self.msg = msg
+
+        #: A tuple representing the path where the entry was created.
         self.path = path
+
         self._tb = tb if tb else []
 
     def print_trace(self):
+        """Print the stored traceback if it exists."""
         traceback.print_list(self._tb)
 
     def path_str(self):

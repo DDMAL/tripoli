@@ -35,6 +35,17 @@ paths in order to simplify the debugging progress. ::
     Error: Field has no '@language' key where one is required. @ data['metadata']['value']
     Error: viewingHint 'pages' is not valid and not uri. @ data['sequences']['canvases']['viewingHint']
 
+Options
+-------
+The ``IIIFValidator`` has a number of options that can be set using booleans to control its behaviour.
+
+.. module:: tripoli
+.. autoclass:: IIIFValidator
+    :noindex:
+    :members: collect_errors, collect_warnings, debug, fail_fast
+
+The complete interface can be found in the :doc:`api guide </api>`.
+
 Tripoli can also be configured to log extra warnings, ignore particular
 errors, and correct errors in manifests. Refer to the :doc:`configuration section</configuration>`
 for more information.

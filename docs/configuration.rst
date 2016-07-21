@@ -111,3 +111,37 @@ document in a ``corrected_doc`` key. ::
     >>> iv = make_library_y_validator()
     >>> iv.validate(libraryY_manifest)
     >>> iv.corrected_doc # A document with the applied corrections
+
+Configuration Tools
+-------------------
+
+A number of utility functions have been included in the ``BaseValidator`` class to simplify
+common configuration jobs.
+
+First among these are ``warnings_to_errors`` and ``errors_to_warnings`` decorators that can
+be used to wrap any function and either upgrade or downgrade its logging output. As an example,
+if you did not care about the thumbnails on manifests, you could easily coerce any errors found
+on that field into warnings with the following ``ManifestValidator``. ::
+
+    >>> class PatchedManifestValidator(ManifestValidator):
+    ...     @ManifestValidator.errors_to_warnings
+    ...     def thumbnail_field(self, value):
+    ...         return super().thumbnail_field(value)
+
+Another useful tool is the ``catch_errors`` function. Given a function and an arbitrary amount
+of arguments, it will call the function on the arguments and return a 2-tuple with the return
+value of the function and a set of any errors it tried to log. These errors will not be logged
+and will not trigger a failure of the validation. The following example accomplishes the same
+goal as the one above ::
+
+    >>> class PatchedCanvasValidator(CanvasValidator):
+    ...     def thumbnail_field(self, value):
+    ...         val, errs = self.catch_errors(super().thumbnail_field, value)
+    ...         for err in errors:
+    ...             self.log_warning('thumbnail', err.message)
+    ...         return val
+
+When implementing a corrective or overriding behaviour, it may be difficult to figure
+out exactly which function needs to be overridden. In this case, setting ``debug`` to
+``true`` on your ``IIIFValidator`` will include tracebacks with your errors and warnings,
+which can be inspected to figure out which function logged them.

@@ -3,3 +3,4 @@ from tripoli.iiif_resource_validators.annotation_validator import AnnotationVali
 from tripoli.iiif_resource_validators.manifest_validator import ManifestValidator
 from tripoli.iiif_resource_validators.sequence_validator import SequenceValidator
 from tripoli.iiif_resource_validators.image_content_validator import ImageContentValidator
+from tripoli.iiif_resource_validators.base_validator import BaseValidator

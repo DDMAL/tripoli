@@ -3,7 +3,7 @@ import logging
 
 from tripoli.iiif_resource_validators.base_validator import FailFastException
 from tripoli.mixins import SubValidationMixin
-from tripoli.logging import ValidatorLogError
+from tripoli.validator_logging import ValidatorLogError
 from tripoli.iiif_resource_validators import (
     ManifestValidator, SequenceValidator, CanvasValidator,
     ImageContentValidator, AnnotationValidator)
@@ -17,31 +17,56 @@ class IIIFValidator(SubValidationMixin):
         self._CanvasValidator = None
         self._SequenceValidator = None
         self._ImageContentValidator = None
+
+        #: ``logging.getLogger()`` used to print output.
         self.logger = logging.getLogger("tripoli")
+
+        #: Sets whether or not to save tracebacks in warnings/errors.
+        #: Default ``False``.
         self.debug = False
+
+        #: Sets whether or not warnings are logged.
+        #: Default ``True``.
         self.collect_warnings = True
+
+        #: Sets whether or not errors are logged.
+        #: Default ``True``.
         self.collect_errors = True
+
+        #: When ``True``, validation stops at first error hit (faster).
+        #: If ``False``, entire document will always be validated.
+        #: Default ``True``.
         self.fail_fast = True
+
+        #: If corrections were made during validation, the corrected document
+        #: will be placed here.
+        self.corrected_doc = {}
+
         self._setup_to_validate()
 
     @property
     def ManifestValidator(self):
+        """An instance of a ManifestValidator."""
         return self._ManifestValidator
 
     @property
     def SequenceValidator(self):
+        """An instance of a SequenceValidator."""
         return self._SequenceValidator
 
     @property
     def CanvasValidator(self):
+        """An instance of a CanvasValidator."""
         return self._CanvasValidator
 
     @property
     def AnnotationValidator(self):
+        """An instance of an AnnotationValidator"""
         return self._AnnotationValidator
 
     @property
     def ImageContentValidator(self):
+        """An instance of an ImageContentValidator"""
         return self._ImageContentValidator
 
     @ManifestValidator.setter
