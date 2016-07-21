@@ -1,7 +1,7 @@
 import json
 import logging
 
-from tripoli.iiif_resource_validators.base_validator import FailFastException
+from tripoli.exceptions import FailFastException
 from tripoli.mixins import SubValidationMixin
 from tripoli.validator_logging import ValidatorLogError
 from tripoli.iiif_resource_validators import (
