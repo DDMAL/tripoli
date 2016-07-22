@@ -68,7 +68,7 @@ Making Corrections
 ------------------
 
 Tripoli can also make corrections to a manifest while validating. This is useful when
-you are aware of a systematic error in a providers manifests that you can easily detect
+you are aware of a systematic error in a provider's manifests that you can easily detect
 and correct before importing or indexing.
 
 Each validation function (those that end with ``*_field``) must return a value. By default,
@@ -77,7 +77,9 @@ compile a corrected document.
 
 For example, if libraryY always sets the ``height`` and ``width`` keys of it's canvases
 as strings instead of ints, you can easily detect this and correct it in the appropriate
-validation functions. Applying the same pattern as above. ::
+validation functions. To handle this, we can write a new ``str_to_int`` function that attempts
+to coerce ints to strings and delegate the work of the ``height_field`` and ``width_field`` functions
+to it. Applying the same pattern as above: ::
 
     >>> from tripoli import IIIFValidator, CanvasValidator
 

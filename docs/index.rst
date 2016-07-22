@@ -13,7 +13,7 @@ The goals of this project are to:
 * Be of use to implementors in designing a system that conforms to the API.
 * Return errors and warnings that are detailed and helpful.
 * Present an organized class structure to simplify overriding and extending behaviour.
-* Provide a top level interface that it easy to use and integrate into an existing workflow.
+* Provide a top level interface that is easy to use and integrate into an existing workflow.
 
 
 Table of Contents

@@ -46,15 +46,17 @@ class SequenceValidator(BaseValidator):
         pass
 
     def type_field(self, value):
+        """Assert that ``@type`` == ``sc:Sequence``"""
         if value != "sc:Sequence":
             self.log_error("@type", "@type must be 'sc:Sequence'")
         return value
 
     def startCanvas_field(self, value):
+        """Validate ``startCanvas`` field."""
         return self._uri_type("startCanvas", value)
 
     def canvases_field(self, value):
-        """Validate canvas list for Sequence."""
+        """Validate ``canvases`` list for Sequence."""
         if not isinstance(value, list):
             self.log_error("canvases", "'canvases' MUST be a list.")
             return value

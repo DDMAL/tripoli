@@ -7,7 +7,7 @@ The ``IIIFValidator`` is responsible for storing all settings and references
 to IIIF resource validators. If you are only using tripoli to debug your own
 manifest creation algorithms, it should be the only class you need to know about.
 
-.. module:: tripoli.tripoli
+.. module:: tripoli
 .. autoclass:: IIIFValidator
     :members:
     :inherited-members:
@@ -28,8 +28,23 @@ All validators inherit from the ``BaseValidator`` class. This, and all validator
 requires a reference to a ``IIIFValidator`` to be initiated, as all settings and
 references to *other* validators are held therein.
 
-.. module:: tripoli.iiif_resource_validators
+.. automodule:: tripoli.iiif_resource_validators
 .. autoclass:: BaseValidator
     :members:
     :inherited-members:
 
+.. autoclass:: ManifestValidator
+    :members:
+    :show-inheritance:
+
+.. autoclass:: SequenceValidator
+    :members:
+    :show-inheritance:
+
+.. autoclass:: CanvasValidator
+    :members:
+    :show-inheritance:
+
+.. autoclass:: AnnotationValidator
+    :members:
+    :show-inheritance:

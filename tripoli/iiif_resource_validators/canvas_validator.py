@@ -36,21 +36,28 @@ class CanvasValidator(BaseValidator):
             self.log_warning("thumbnail", "Canvas SHOULD have a thumbnail when there is more than one image")
 
     def type_field(self, value):
+        """Assert that ``@type == 'sc:Canvas``"""
         if value != "sc:Canvas":
             self.log_error("@type", "@type must be 'sc:Canvas'.")
         return value
 
     def height_field(self, value):
+        """Validate ``height`` field."""
         if not isinstance(value, int):
             self.log_error("height", "height must be int.")
         return value
 
     def width_field(self, value):
+        """Validate ``width`` field."""
         if not isinstance(value, int):
             self.log_error("width", "width must be int.")
         return value
 
     def images_field(self, value):
+        """Validate ``images`` list.
+
+        Calls a sub-validation procedure handled by the :class:`AnnotationValidator`.
+        """
         if isinstance(value, list):
             path = self._path + ("images",)
             return [self._sub_validate(self.AnnotationValidator, i, path,
@@ -62,6 +69,7 @@ class CanvasValidator(BaseValidator):
         return value
 
     def other_content_field(self, value):
+        """Validate ``otherContent`` field."""
         if not isinstance(value, list):
             self.log_error("otherContent", "otherContent must be a list.")
             return value
