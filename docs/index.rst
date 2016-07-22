@@ -10,10 +10,10 @@ Tripoli is a validator for documents conforming to the
 `IIIF presentation API 2.1 <http://iiif.io/api/presentation/2.1/>`_.
 The goals of this project are to:
 
-* Be of use to implementors in designing a system that conforms to the API.
+* Aid developers who are implementing the IIIF Presentation API.
 * Return errors and warnings that are detailed and helpful.
-* Present an organized class structure to simplify overriding and extending behaviour.
-* Provide a top level interface that is easy to use and integrate into an existing workflow.
+* Simplify overriding and extended validation behaviour.
+* Provide a top level interface that is easy integrate into existing workflows.
 
 
 Table of Contents
