@@ -3,8 +3,8 @@ API Guide
 
 Main Validator
 --------------
-The ``IIIFValidator`` is responsible for storing all settings and references
-to IIIF resource validators. If you are only using tripoli to debug your own
+The ``IIIFValidator`` is the root validator, responsible for storing all settings
+and references to IIIF resource validators. If you are only using Tripoli to debug your own
 manifest creation algorithms, it should be the only class you need to know about.
 
 .. module:: tripoli
@@ -25,7 +25,7 @@ Error and Warning Logging
 IIIF Resource Validators
 ------------------------
 All validators inherit from the ``BaseValidator`` class. This, and all validators,
-requires a reference to a ``IIIFValidator`` to be initiated, as all settings and
+requires a reference to a ``IIIFValidator`` to be initialized, as all settings and
 references to *other* validators are held therein.
 
 .. automodule:: tripoli.resource_validators
