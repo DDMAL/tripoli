@@ -21,7 +21,7 @@ Using Tripoli to validate a IIIF document is easy. ::
     True
 
 When Tripoli detects issues in a document, it provides informative errors and warnings with
-paths in order to simplify the debugging progress. ::
+key paths to simplify the debugging progress. ::
 
     >>> man = requests.get("http://example.com/bad_manifest.json")
     >>> iv.validate(man)
@@ -40,7 +40,7 @@ paths in order to simplify the debugging progress. ::
 
 Options
 -------
-The ``IIIFValidator`` has a number of options that can be set using booleans to control its behaviour.
+The ``IIIFValidator`` has a number of options to control its behaviour.
 
 .. module:: tripoli
 .. autoclass:: IIIFValidator
