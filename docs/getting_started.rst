@@ -3,6 +3,9 @@ Getting Started
 
 Installing
 ----------
+Tripoli can by installed using ``pip``. ::
+
+    >>> pip install tripoli
 
 Validation
 ----------
