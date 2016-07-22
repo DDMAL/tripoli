@@ -138,7 +138,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         finally:
             self._path = old_path
 
-    def catch_errors(self, fn, *args, **kwargs):
+    def mute_errors(self, fn, *args, **kwargs):
         """Run given function and catch any of the errors it logged.
 
         The self._errors key will not be changed by using this function.
@@ -544,7 +544,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     def viewing_hint_field(self, value):
         """Validate ``viewingHint`` field against ``VIEW_HINTS`` set."""
         if value not in self.VIEW_HINTS:
-            val, errors = self.catch_errors(self._uri_type, "viewingHint", value)
+            val, errors = self.mute_errors(self._uri_type, "viewingHint", value)
             if errors:
                 self.log_error("viewingHint", "viewingHint '{}' is not valid and not uri.".format(value))
         return value

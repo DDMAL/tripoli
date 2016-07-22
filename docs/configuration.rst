@@ -131,7 +131,7 @@ on that field into warnings with the following ``ManifestValidator``. ::
     ...     def thumbnail_field(self, value):
     ...         return super().thumbnail_field(value)
 
-Another useful tool is the ``catch_errors`` function. Given a function and an arbitrary amount
+Another useful tool is the ``mute_errors`` function. Given a function and an arbitrary amount
 of arguments, it will call the function on the arguments and return a 2-tuple with the return
 value of the function and a set of any errors it tried to log. These errors will not be logged
 and will not trigger a failure of the validation. The following example accomplishes the same
@@ -139,7 +139,7 @@ goal as the one above ::
 
     >>> class PatchedManifestValidator(ManifestValidator):
     ...     def thumbnail_field(self, value):
-    ...         val, errs = self.catch_errors(super().thumbnail_field, value)
+    ...         val, errs = self.mute_errors(super().thumbnail_field, value)
     ...         for err in errors:
     ...             self.log_warning('thumbnail', err.message)
     ...         return val
