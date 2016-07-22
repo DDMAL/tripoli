@@ -10,17 +10,17 @@ Overriding Validation Behaviour
 
 Tripoli presents a class hierarchy for IIIF document validation that closely
 mirrors the structure of the API documentation itself. Each major IIIF manifest resource type has a class responsible
-for validating it, making it easy to override behaviour, and each field on the resource has a corresponding function which is responsible
-for checking that it's value is correct and calling ``self.log_error`` or ``self.log_warning``
-otherwise. On our own aggregation
-service, `Musiclibs <http://musiclibs.net>`_, we use this functionality to ignore or correct
-systematic errors made by providers.
+for validating it, making it easy to override behaviour, and each field on the resource has a corresponding function
+which is responsible for checking that it's value is correct and calling ``self.log_error`` or ``self.log_warning``
+otherwise. On our own aggregation service, `Musiclibs <http://musiclibs.net>`_, we use this functionality to ignore
+or correct systematic errors made by providers.
 
 ### Ignoring Validation Errors
 
 To illustrate, we will use an example from our own project. We know that "Library X" has a bug
 in their manifest generation software: they have incorrectly copied the url of the
-presentation API context. Since this is a validation error, but does not present a problem with viewing the document, we want to change this error to a warning. If we try to validate one of their manifests, we get the
+presentation API context. Since this is a validation error, but does not present a problem with viewing the document,
+we want to change this error to a warning. If we try to validate one of their manifests, we get the
 following errors. ::
 
     >>> from tripoli import IIIFValidator
@@ -39,7 +39,8 @@ We can inspect the manifest itself to see what the ``@context`` key is. ::
 
 Just as suspected, the context URI has been incorrectly copied and the last two characters of "json" are missing.
 
-To change the validation behaviour we we subclass the ``ManifestValidator``, changing the default field function for the '@context' key to one that expects this error and compensates for it.
+To change the validation behaviour we subclass the ``ManifestValidator``, changing the default field function for the
+'@context' key to one that expects this error and compensates for it.
 
 Here is a function that returns a IIIFValidator that will accept Library X documents. ::
 
@@ -136,7 +137,7 @@ value of the function and a set of any errors it tried to log. These errors will
 and will not trigger a failure of the validation. The following example accomplishes the same
 goal as the one above ::
 
-    >>> class PatchedCanvasValidator(CanvasValidator):
+    >>> class PatchedManifestValidator(ManifestValidator):
     ...     def thumbnail_field(self, value):
     ...         val, errs = self.catch_errors(super().thumbnail_field, value)
     ...         for err in errors:
