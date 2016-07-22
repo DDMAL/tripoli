@@ -18,12 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from tripoli.tripoli import __version__
 
 setup(
     name='tripoli',
-    packages=['tripoli'],
+    packages=find_packages(),
     version=__version__,
     license='https://opensource.org/licenses/MIT',
     description='IIIF document validation.',
