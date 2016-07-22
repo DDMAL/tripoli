@@ -9,8 +9,7 @@ class ImageContentValidator(BaseValidator):
                         "next", "prev", "startIndex", "collections", "manifests", "members",
                         "sequences", "structures", "canvases", "resources", "otherContent",
                         "images", "ranges"}
-    REQUIRED_FIELDS = {'@type'}
-    RECOMMENDED_FIELDS = {'@id', 'profile'}
+    REQUIRED_FIELDS = {'@type', '@id'}
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
@@ -25,7 +24,6 @@ class ImageContentValidator(BaseValidator):
     def _run_validation(self, **kwargs):
         self._check_all_key_constraints("resource", self._json)
         return self._compare_dicts(self.ImageContentSchema, self._json)
-
 
     def type_field(self, value):
         """Warn if ``@type != 'dctypes:Image'``"""

@@ -1,4 +1,4 @@
-from tests.validator_tester import ValidatorTestingTools
+from .validator_testing_tools import ValidatorTestingTools
 from tripoli import IIIFValidator
 from tripoli.resource_validators.base_validator import BaseValidator
 
@@ -146,7 +146,11 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         self.assertFalse(self.has_errors())
         self.clear_errors_and_warnings()
 
-        val = {"service": {"@context": "http://iiif.io/api/image/2/context.json"}}
+        val = {"@id": "http://google.ca",
+               "@type": "dctypes:Image",
+               "service": {"@context": "http://iiif.io/api/image/2/context.json",
+                           "@id": "http://google.ca",
+                           "profile": "http://google.ca"}}
         self.test_subject._general_image_resource("unknown_field", val)
         self.assertFalse(self.has_warnings())
         self.assertFalse(self.has_errors())
