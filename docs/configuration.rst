@@ -15,7 +15,8 @@ which is responsible for checking that it's value is correct and calling ``self.
 otherwise. On our own aggregation service, `Musiclibs <http://musiclibs.net>`_, we use this functionality to ignore
 or correct systematic errors made by providers.
 
-### Ignoring Validation Errors
+Ignoring Validation Errors
+--------------------------
 
 To illustrate, we will use an example from our own project. We know that "Library X" has a bug
 in their manifest generation software: they have incorrectly copied the url of the
