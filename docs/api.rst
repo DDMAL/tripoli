@@ -28,7 +28,7 @@ All validators inherit from the ``BaseValidator`` class. This, and all validator
 requires a reference to a ``IIIFValidator`` to be initiated, as all settings and
 references to *other* validators are held therein.
 
-.. automodule:: tripoli.iiif_resource_validators
+.. automodule:: tripoli.resource_validators
 .. autoclass:: BaseValidator
     :members:
     :inherited-members:

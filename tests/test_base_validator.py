@@ -1,6 +1,6 @@
 from tests.validator_tester import ValidatorTestingTools
 from tripoli import IIIFValidator
-from tripoli.iiif_resource_validators.base_validator import BaseValidator
+from tripoli.resource_validators.base_validator import BaseValidator
 
 
 class TestBaseValidatorMixin(ValidatorTestingTools):

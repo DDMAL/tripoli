@@ -4,7 +4,7 @@ import logging
 from .exceptions import FailFastException
 from .mixins import SubValidationMixin
 from .validator_logging import ValidatorLogError
-from .iiif_resource_validators import (
+from .resource_validators import (
     ManifestValidator, SequenceValidator, CanvasValidator,
     ImageContentValidator, AnnotationValidator)
 

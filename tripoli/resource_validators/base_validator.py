@@ -501,8 +501,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             path = self._path + (field,)
             service = value.get("service")
             if service and service.get("@context") == "http://iiif.io/api/image/2/context.json":
-                return self._sub_validate(self.AnnotationValidator, service, path,
-                                          only_resource=True)
+                return self._sub_validate(self.ImageContentValidator, service, path)
             else:
                 val = self._uri_type(field, value)
                 self.log_warning(field, "{} SHOULD be IIIF image service.".format(field))
