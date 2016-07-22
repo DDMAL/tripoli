@@ -26,22 +26,15 @@ class ImageContentValidator(BaseValidator):
         self._check_all_key_constraints("resource", self._json)
         return self._compare_dicts(self.ImageContentSchema, self._json)
 
-    def height_field(self, value):
-        if not isinstance(value, int):
-            self.log_error("height", "height must be int.")
-        return value
-
-    def width_field(self, value):
-        if not isinstance(value, int):
-            self.log_error("width", "width must be int.")
-        return value
 
     def type_field(self, value):
+        """Warn if ``@type != 'dctypes:Image'``"""
         if value != 'dctypes:Image':
             self.log_warning('@type', "@type SHOULD be \'dctypes:Image\'")
         return value
 
     def service_field(self, value):
+        """Validate the image service in this resource."""
         with self._temp_path(self._path + ('service',)):
             self._check_required_fields("image", value, ['@id', '@context'])
             self._check_recommended_fields("image", value, ['profile'])

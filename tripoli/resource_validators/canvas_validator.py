@@ -41,18 +41,6 @@ class CanvasValidator(BaseValidator):
             self.log_error("@type", "@type must be 'sc:Canvas'.")
         return value
 
-    def height_field(self, value):
-        """Validate ``height`` field."""
-        if not isinstance(value, int):
-            self.log_error("height", "height must be int.")
-        return value
-
-    def width_field(self, value):
-        """Validate ``width`` field."""
-        if not isinstance(value, int):
-            self.log_error("width", "width must be int.")
-        return value
-
     def images_field(self, value):
         """Validate ``images`` list.
 

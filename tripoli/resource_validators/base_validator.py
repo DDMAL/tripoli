@@ -65,7 +65,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     @staticmethod
     def errors_to_warnings(fn):
-        """Cast any errors to warnings on any *_field or *_type function."""
+        """Cast any errors to warnings on any ``*_field`` or ``*_type`` function."""
 
         def coerce_errors(*args, **kwargs):
             self = args[0]
@@ -87,7 +87,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     @staticmethod
     def warnings_to_errors(fn):
-        """Cast any warnings to errors on any *_field or *_type function"""
+        """Cast any warnings to errors on any ``*_field`` or ``*_type`` function."""
 
         def coerce_warnings(*args, **kwargs):
             self = args[0]
@@ -413,48 +413,60 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     # Common field definitions.
     def id_field(self, value):
-        """Validate the `@id` field of the resource."""
+        """Validate the ``@id`` field of the resource."""
         return self._http_uri_type("@id", value)
 
     def type_field(self, value):
-        """Validate the `@type` field of the resource."""
+        """Validate the ``@type`` field of the resource."""
         raise NotImplemented
 
     def label_field(self, value):
-        """Validate the `label` field of the resource."""
+        """Validate the ``label`` field of the resource."""
         return self._str_or_val_lang_type("label", value)
 
     def description_field(self, value):
-        """Validate the `description` field of the resource."""
+        """Validate the ``description`` field of the resource."""
         return self._str_or_val_lang_type("description", value)
 
     def attribution_field(self, value):
-        """Validate the `attribution` field of the resource."""
+        """Validate the ``attribution`` field of the resource."""
         return self._str_or_val_lang_type("attribution", value)
 
     def license_field(self, value):
-        """Validate the `license` field of the resource."""
+        """Validate the ``license`` field of the resource."""
         return self._repeatable_uri_type("license", value)
 
     def related_field(self, value):
-        """Validate the `related` field of the resource."""
+        """Validate the ``related`` field of the resource."""
         return self._repeatable_uri_type("related", value)
 
     def rendering_field(self, value):
-        """Validate the `rendering` field of the resource."""
+        """Validate the ``rendering`` field of the resource."""
         return self._repeatable_uri_type("rendering", value)
 
     def service_field(self, value):
-        """Validate the `service` field of the resource."""
+        """Validate the ``service`` field of the resource."""
         return self._repeatable_uri_type("service", value)
 
     def seeAlso_field(self, value):
-        """Validate the `seeAlso` field of the resource."""
+        """Validate the ``seeAlso`` field of the resource."""
         return self._repeatable_uri_type("seeAlso", value)
 
     def within_field(self, value):
-        """Validate the `within` field of the resource."""
+        """Validate the ``within`` field of the resource."""
         return self._repeatable_uri_type("within", value)
+
+    def height_field(self, value):
+        """Validate ``height`` field."""
+        if not isinstance(value, int):
+            self.log_error("height", "height must be int.")
+        return value
+
+    def width_field(self, value):
+        """Validate ``width`` field."""
+        if not isinstance(value, int):
+            self.log_error("width", "width must be int.")
+        return value
 
     def metadata_field(self, value):
         """Validate the `metadata` field of the resource.
@@ -479,11 +491,11 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         return value
 
     def thumbnail_field(self, value):
-        """Validate the `thumbnail` field of the resource."""
+        """Validate the ``thumbnail`` field of the resource."""
         return self._general_image_resource("thumbnail", value)
 
     def logo_field(self, value):
-        """Validate the `logo` field of the resource."""
+        """Validate the ``logo`` field of the resource."""
         return self._general_image_resource("logo", value)
 
     def _general_image_resource(self, field, value):
@@ -510,6 +522,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         return value
 
     def viewing_hint_field(self, value):
+        """Validate ``viewingHint`` field against ``VIEW_HINTS`` set."""
         if value not in self.VIEW_HINTS:
             val, errors = self.catch_errors(self._uri_type, "viewingHint", value)
             if errors:
@@ -517,7 +530,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         return value
 
     def viewing_dir_field(self, value):
-        """Validate against VIEW_DIRS list."""
+        """Validate ``viewingDir`` field against ``VIEW_DIRS`` set."""
         if value not in self.VIEW_DIRS:
             self.log_error("viewingDirection", "viewingDirection '{}' is not valid and not uri.".format(value))
         return value

@@ -48,3 +48,7 @@ references to *other* validators are held therein.
 .. autoclass:: AnnotationValidator
     :members:
     :show-inheritance:
+
+.. autoclass:: ImageContentValidator
+    :members:
+    :show-inheritance:

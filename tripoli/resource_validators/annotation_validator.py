@@ -1,4 +1,3 @@
-import functools
 from collections import OrderedDict
 
 from .base_validator import BaseValidator
@@ -35,32 +34,27 @@ class AnnotationValidator(BaseValidator):
         return self._compare_dicts(self.ImageSchema, self._json)
 
     def type_field(self, value):
+        """Assert that ``@type == 'oa:Annotation'``."""
         if value != "oa:Annotation":
             self.log_error("@type", "@type must be 'oa:Annotation'.")
         return value
 
     def motivation_field(self, value):
+        """Assert that ``motivation == 'sc:painting'``."""
         if value != "sc:painting":
             self.log_error("motivation", "motivation must be 'sc:painting'.")
         return value
 
-    def height_field(self, value):
-        if not isinstance(value, int):
-            self.log_error("height", "height must be int.")
-        return value
-
-    def width_field(self, value):
-        if not isinstance(value, int):
-            self.log_error("width", "width must be int.")
-        return value
-
     def on_field(self, value):
-        """Validate the 'on' property of an Annotation."""
+        """Validate the ``on`` field."""
         if self.canvas_uri and value != self.canvas_uri:
             self.log_error("on", "'on' must reference the canvas URI.")
         return value
 
     def resource_field(self, value):
-        """Validate image resources inside images list of Canvas"""
+        """Validate ``resources`` list.
+
+        Calls a sub-validation procedure handled by the :class:`ImageContentValidator`.
+        """
         path = self._path + ("resource", )
         return self._sub_validate(self.ImageContentValidator, value, path)
