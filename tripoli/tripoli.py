@@ -8,6 +8,8 @@ from .resource_validators import (
     ManifestValidator, SequenceValidator, CanvasValidator,
     ImageContentValidator, AnnotationValidator)
 
+__version__ = "0.1"
+
 
 class IIIFValidator(SubValidationMixin):
     def __init__(self):
