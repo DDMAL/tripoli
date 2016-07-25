@@ -51,6 +51,7 @@ class SequenceValidator(BaseValidator):
             ('@id', self.id_field),
             ('canvases', self._not_allowed)
         ))
+        self.setup()
 
     def _run_validation(self, **kwargs):
         self._check_all_key_constraints("sequence", self._json)

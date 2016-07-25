@@ -40,6 +40,7 @@ class ImageContentValidator(BaseValidator):
             ('width', self.width_field),
             ('service', self.service_field)
         ))
+        self.setup()
 
     def _run_validation(self, **kwargs):
         self._check_all_key_constraints("resource", self._json)

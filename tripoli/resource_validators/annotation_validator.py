@@ -44,6 +44,7 @@ class AnnotationValidator(BaseValidator):
         ))
 
         self.canvas_uri = None
+        self.setup()
 
     def _raise_additional_warnings(self, validation_results):
         pass

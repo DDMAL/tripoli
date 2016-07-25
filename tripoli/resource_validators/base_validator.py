@@ -166,6 +166,9 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         self._warnings = set()
         self._path = path
 
+    def setup(self):
+        pass
+
     def _validate(self, json_dict, path=None, **kwargs):
         """Entry point for callers to validate a chunk of data."""
 

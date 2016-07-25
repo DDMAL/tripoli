@@ -42,6 +42,7 @@ class ManifestValidator(BaseValidator):
             ('structures', self.structures_field),
             ('sequences', self.sequences_field),
         ))
+        self.setup()
 
     def _run_validation(self, **kwargs):
         self._check_all_key_constraints("manifest", self._json)

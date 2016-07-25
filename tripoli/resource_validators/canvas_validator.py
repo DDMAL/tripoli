@@ -44,6 +44,7 @@ class CanvasValidator(BaseValidator):
             ('other_content', self.other_content_field),
             ('images', self.images_field)
         ))
+        self.setup()
 
     def _run_validation(self, **kwargs):
         self.canvas_uri = self._json['@id']
