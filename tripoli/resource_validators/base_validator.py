@@ -100,7 +100,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             new_errors = set(self.errors)
             diff = new_errors - old_errors
             for err in diff:
-                self._log_warning(err.path[-1], "(error coerced to warning) {}".format(err.msg))
+                self.log_warning(err.path[-1], "(error coerced to warning) {}".format(err.msg))
             self._errors = old_errors
             return val
 
@@ -117,7 +117,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             new_warnings = set(self.warnings)
             diff = new_warnings - old_warnings
             for err in diff:
-                self._log_error(err.path[-1], "(warning coerced to error) {}".format(err.msg))
+                self.log_error(err.path[-1], "(warning coerced to error) {}".format(err.msg))
             self._warnings = old_warnings
             return val
 
