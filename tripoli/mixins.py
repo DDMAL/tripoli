@@ -90,7 +90,7 @@ class SubValidationMixin:
                 self._errors = self._errors | subschema._errors
             if subschema._warnings:
                 self._warnings = self._warnings | subschema._warnings
-            if subschema.corrected_doc:
-                return subschema.corrected_doc
-            else:
-                return subschema._json
+        if subschema.corrected_doc:
+            return subschema.corrected_doc
+        else:
+            return subschema._json
