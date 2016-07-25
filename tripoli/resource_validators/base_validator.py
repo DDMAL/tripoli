@@ -24,6 +24,7 @@ import json
 import traceback
 import urllib.parse
 import copy
+import uuid
 
 from ..mixins import LinkedValidatorMixin, SubValidationMixin
 from ..validator_logging import ValidatorLogError, ValidatorLogWarning
@@ -434,6 +435,14 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     # Common field definitions.
     def id_field(self, value):
         """Validate the ``@id`` field of the resource."""
+        if value.startswith("urn:uuid:"):
+            id_uuid = value.replace("urn:uuid:", "")
+            try:
+                uuid.UUID(id_uuid)
+            except ValueError:
+                self.log_error("@id", "Invalid UUID in @id.")
+            finally:
+                return value
         return self._http_uri_type("@id", value)
 
     def type_field(self, value):
