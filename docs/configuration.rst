@@ -50,7 +50,7 @@ Here is a function that returns a IIIFValidator that will accept Library X docum
     >>> def make_library_x_validator():
     ...     class PatchedManifestValidator(ManifestValidator):
     ...         @override
-    ...         def context_field(value):
+    ...         def context_field(self, value):
     ...             if value == 'http://iiif.io/api/presentation/2/context.js':
     ...                 self.log_warning("@context", "Allowed Library X shenanigans.")
     ...                 return value
@@ -87,7 +87,7 @@ to it. Applying the same pattern as above: ::
 
     >>> def make_library_y_validator():
     ...     class PatchedCanvasValidator(CanvasValidator):
-    ...         def str_to_int(field, value):
+    ...         def str_to_int(self, field, value):
     ...         """Attempt to coerce value to int and log results."""
     ...             try:
     ...                 val = int(value)
@@ -98,11 +98,11 @@ to it. Applying the same pattern as above: ::
     ...                 return value
     ...
     ...         @override
-    ...         def height_field(value):
+    ...         def height_field(self, value):
     ...             return str_to_int("height", value)
     ...
     ...         @override
-    ...         def width_field(value):
+    ...         def width_field(self, value):
     ...             return str_to_int("width", value)
     ...
     ...     iv = IIIFValidator()
