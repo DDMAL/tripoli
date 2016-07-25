@@ -36,9 +36,10 @@ class SequenceValidator(BaseValidator):
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
+        self.emb = None
         self.EmbSequenceSchema = OrderedDict((
             ('@type', self.type_field),
-            ('@context', self._not_allowed),
+            ('@context', self.context_field),
             ('@id', self.id_field),
             ('startCanvas', self.startCanvas_field),
             ('viewingDirection', self.viewing_dir_field),
@@ -58,7 +59,8 @@ class SequenceValidator(BaseValidator):
         return self._validate_sequence(**kwargs)
 
     def _validate_sequence(self, emb=True):
-        if emb:
+        self.emb = emb
+        if self.emb:
             return self._compare_dicts(self.EmbSequenceSchema, self._json)
         else:
             return self._compare_dicts(self.LinkedSequenceSchema, self._json)
@@ -70,6 +72,14 @@ class SequenceValidator(BaseValidator):
         """Assert that ``@type`` == ``sc:Sequence``"""
         if value != "sc:Sequence":
             self.log_error("@type", "@type must be 'sc:Sequence'")
+        return value
+
+    def context_field(self, value):
+        if self.emb:
+            self.log_error("@context", "@context field not allowed in embedded sequence.")
+            return value
+        if value != self.PRESENTATION_API_URI:
+            self.log_error("@context", "unknown context.")
         return value
 
     def startCanvas_field(self, value):
