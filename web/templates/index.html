@@ -2,46 +2,43 @@
 <head>
     <title>{% block title %}Tripoli{% endblock %}</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
+<body class="site">
+<div class="site-content">
+    <h1>Validate with Tripoli.</h1>
+    <form class="pure-form" action="/" method="post">
+        <fieldset>
+            <button type="submit" class="pure-button pure-button-primary" style="float: right">Validate</button>
+            <div style="overflow: hidden; padding-right: .5em;">
+                <input type="text" placeholder="Manifest URL" name="manifest" style="width: 100%;" />
+            </div>​
+        </fieldset>
+    </form>
+    {% if manifest_url %}
+        <p>Results for: <a href={{ manifest_url }}>{{ manifest_url }}</a></p>
+    {% endif %}
 
-<div class="pure-g">
-    <div class="pure-u-1-5"></div>
-    <div class="pure-u-3-5">
-        <h1>Validate with Tripoli.</h1>
-        <form class="pure-form" action="/" method="post">
-            <fieldset>
-                <div class="pure-g">
-                    <div class="pure-u-4-5">
-                        <input type="text" placeholder="Manifest URL" name="manifest" style="width:99%">
-                    </div>
-                    <div class="pure-u-1-5">
-                        <button type="submit" class="pure-button pure-button-primary">Validate</button>
-                    </div>
-                </div>
-            </fieldset>
-        </form>
-        {% if manifest_url %}
-            <p>Results for: <a href={{ manifest_url }}>{{ manifest_url }}</a></p>
-        {% endif %}
+    {% if is_valid == True %}
+        <p style="color:darkolivegreen">Manifest passed validation.</p>
+    {% elif is_valid == False %}
+        <p style="color:red">Manifest failed validation.</p>
+    {% endif %}
 
-        {% if is_valid == True %}
-            <p style="color:darkolivegreen">Manifest passed validation.</p>
-        {% elif is_valid == False %}
-            <p style="color:red">Manifest failed validation.</p>
-        {% endif %}
+    <ul class="output">
+        {% for error in errors %}
+            <li style="color:orangered">{{ error }}</li>
+        {% endfor %}
+        {% for warn in warnings %}
+            <li style="color:orange">{{ warn }}</li>
+        {% endfor %}
+    </ul>
 
-        <ul class="output">
-            {% for error in errors %}
-                <li style="color:orangered">{{ error }}</li>
-            {% endfor %}
-            {% for warn in warnings %}
-                <li style="color:orange">{{ warn }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="pure-u-1-5"></div>
 </div>
-
 </body>
+<footer class="site-footer">
+    <hr color="#ccc">
+    <a href="https://github.com/DDMAL/tripoli">GitHub Project</a> -
+    <a href="http://tripoli.readthedocs.io/en/latest/">Documentation</a>
+</footer>

@@ -1,0 +1,35 @@
+.site {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+.site-content {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
+    min-width:50em;
+    flex: 1;
+}
+
+.site-footer
+{
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+    min-width: 50em;
+    padding-bottom: 1em;
+    text-align: center;
+}
+
+a {
+    text-decoration: none;
+    color: #4078c0;
+}
+a:visited {
+    color: #4078c0;
+}
+
+a:hover {
+    text-decoration: underline;
+}
