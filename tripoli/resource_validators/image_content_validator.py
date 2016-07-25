@@ -54,10 +54,10 @@ class ImageContentValidator(BaseValidator):
     def service_field(self, value):
         """Validate the image service in this resource."""
         with self._temp_path(self._path + ('service',)):
-            self._check_required_fields("image", value, ['@id', '@context'])
-            self._check_recommended_fields("image", value, ['profile'])
+            self._check_required_fields("image service", value, ['@id', '@context'])
+            self._check_recommended_fields("image service", value, ['profile'])
             context = value.get("@context")
-            if context != self.IMAGE_API_2:
+            if context and context != self.IMAGE_API_2:
                 if context != self.IMAGE_API_1:
                     self.log_error('@context', "Must reference IIIF image API.")
                 else:
