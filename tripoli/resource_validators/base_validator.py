@@ -519,10 +519,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         return self._general_image_resource("logo", value)
 
     def _general_image_resource(self, field, value):
-        """Image resource validator. Basic logic is:
+        """Image resource validator for logos and thumbnails. Basic logic is:
 
         -Check if field is string. If yes, warn that IIIF image service is preferred.
-        -If it's a IIIF resource, try to validate it.
+        -If a IIIF image service is avaliable,  try to validate it.
         -Otherwise, check that it's ID is at least a uri.
         """
 
@@ -530,10 +530,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             self.log_warning(field, "{} SHOULD be IIIF image service.".format(field))
             return self._uri_type(field, value)
         if isinstance(value, dict):
-            path = self._path + (field,)
             service = value.get("service")
             if service and service.get("@context") == "http://iiif.io/api/image/2/context.json":
-                return self._sub_validate(self.ImageContentValidator, value, path)
+                value['service'] = self.ImageContentValidator.service_field(service)
+                return value
             else:
                 val = self._uri_type(field, value)
                 self.log_warning(field, "{} SHOULD be IIIF image service.".format(field))
