@@ -1,0 +1,8 @@
+[run]
+
+source =
+    ./tripoli
+
+omit =
+    *__init__*
+    */tests/*
