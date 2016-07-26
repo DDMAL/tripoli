@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, abort
 from tripoli import IIIFValidator
 import requests
+import uuid
 import ujson as json
 
 JSON_TYPE = 0
@@ -9,6 +10,23 @@ TEXT_TYPE = 1
 app = Flask(__name__)
 app.config['json_encoder'] = json
 
+with open('secret_key', 'rb') as f:
+    app.secret_key = f.read()
+
+@app.before_request
+def csrf_protect():
+    if request.method == "POST":
+        token = session.pop('_csrf_token', None)
+        if not token or token != request.form.get('_csrf_token'):
+            abort(403)
+
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = str(uuid.uuid4())
+    return session['_csrf_token']
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 def val_with_content_type(value, template):
     """Return either json or text/html with value dict."""
@@ -57,8 +75,8 @@ def index_post():
         iv.logger.setLevel("CRITICAL")
         iv.validate(man)
 
-        resp = {"errors": [str(err) for err in iv.errors],
-                "warnings": [str(warn) for warn in iv.warnings],
+        resp = {"errors": [str(err) for err in sorted(iv.errors)],
+                "warnings": [str(warn) for warn in sorted(iv.warnings)],
                 "is_valid": iv.is_valid,
                 "manifest_url": manifest_url}
         return val_with_content_type(resp, 'index.html')

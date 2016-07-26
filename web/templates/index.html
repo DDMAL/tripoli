@@ -10,6 +10,7 @@
     <h1>Validate with Tripoli.</h1>
     <form class="pure-form" action="/" method="post">
         <fieldset>
+            <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
             <button type="submit" class="pure-button pure-button-primary" style="float: right">Validate</button>
             <div style="overflow: hidden; padding-right: .5em;">
                 <input type="text" placeholder="Manifest URL" name="manifest" style="width: 100%;" />
@@ -21,9 +22,9 @@
     {% endif %}
 
     {% if is_valid == True %}
-        <p style="color:darkolivegreen">Manifest passed validation.</p>
+        <strong style="color:darkolivegreen">Manifest passed validation.</strong>
     {% elif is_valid == False %}
-        <p style="color:red">Manifest failed validation.</p>
+        <strong style="color:red">Manifest failed validation.</strong>
     {% endif %}
 
     <ul class="output">
