@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, render_template, session, abort
 from tripoli import IIIFValidator
 import requests
-import uuid
 import ujson as json
 
 JSON_TYPE = 0
@@ -13,20 +12,6 @@ app.config['json_encoder'] = json
 with open('secret_key', 'rb') as f:
     app.secret_key = f.read()
 
-@app.before_request
-def csrf_protect():
-    if request.method == "POST":
-        token = session.pop('_csrf_token', None)
-        if not token or token != request.form.get('_csrf_token'):
-            abort(403)
-
-
-def generate_csrf_token():
-    if '_csrf_token' not in session:
-        session['_csrf_token'] = str(uuid.uuid4())
-    return session['_csrf_token']
-
-app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 def val_with_content_type(value, template):
     """Return either json or text/html with value dict."""
@@ -45,30 +30,29 @@ def fetch_manifest(manifest_url):
     return man
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        return index_post()
-    if request.method == 'GET':
+    manifest_url = request.args.get('manifest')
+
+    if manifest_url:
+        return validate_manifest(manifest_url)
+    else:
         return index_get()
 
 
 def index_get():
-    val = {"message": "POST with key 'manifest' to validate."}
+    val = {"message": "GET with query parameter 'manifest' to validate."}
     return val_with_content_type(val, 'index.html')
 
 
-def index_post():
-    if request.content_type == 'application/json':
-        manifest_url = request.json.get("manifest")
-    else:
-        manifest_url = request.form.get('manifest')
-
+def validate_manifest(manifest_url):
     if manifest_url:
         try:
             man = fetch_manifest(manifest_url)
         except Exception as e:
-            return jsonify({"exception": str(e)})
+            resp = jsonify({"message": "Could not retrieve manifest at '{}'".format(manifest_url)})
+            resp.status_code = 400
+            return resp
 
         iv = IIIFValidator()
         iv.fail_fast = False
@@ -80,7 +64,6 @@ def index_post():
                 "is_valid": iv.is_valid,
                 "manifest_url": manifest_url}
         return val_with_content_type(resp, 'index.html')
-    return jsonify({'exception': "Missing 'manifest' key in request."})
 
 if __name__ == "__main__":
     app.run()

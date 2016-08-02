@@ -8,9 +8,8 @@
 <body class="site">
 <div class="site-content">
     <h1>Validate with Tripoli.</h1>
-    <form class="pure-form" action="/" method="post">
+    <form class="pure-form" action="/" method="get">
         <fieldset>
-            <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
             <button type="submit" class="pure-button pure-button-primary" style="float: right">Validate</button>
             <div style="overflow: hidden; padding-right: .5em;">
                 <input type="text" placeholder="Manifest URL" name="manifest" style="width: 100%;" />
