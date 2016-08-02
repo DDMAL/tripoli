@@ -28,7 +28,7 @@ from .resource_validators import (
     ManifestValidator, SequenceValidator, CanvasValidator,
     ImageContentValidator, AnnotationValidator)
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 
 class IIIFValidator(SubValidationMixin):
