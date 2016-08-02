@@ -22,6 +22,17 @@
     text-align: center;
 }
 
+body {
+    color: #555;
+    font-family: "Helvetica", "Arial", sans-serif;
+}
+
+h1,
+h2,
+strong {
+  color: #333;
+}
+
 a {
     text-decoration: none;
     color: #4078c0;

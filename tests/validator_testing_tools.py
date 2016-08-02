@@ -59,7 +59,7 @@ class ValidatorTestingTools(unittest.TestCase):
         return value
 
     def fake_invalid(self, value):
-        self.test_subject.log_error("fake_field", "test error")
+        self.test_subject.log_error("fake field", "test error")
         return value
 
     def fake_change(self, value):

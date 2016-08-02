@@ -1,7 +1,8 @@
 from .validator_testing_tools import ValidatorTestingTools
 from tripoli import IIIFValidator
 from tripoli.resource_validators.base_validator import BaseValidator
-
+from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning
+from tripoli.exceptions import FailFastException
 
 class TestBaseValidatorMixin(ValidatorTestingTools):
 
@@ -162,3 +163,51 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         self.assert_errors_with_inputs(self.test_subject.viewing_hint_field, ["error"])
         self.assert_no_errors_with_inputs(self.test_subject.viewing_dir_field, ["paged", "non-paged"])
         self.assert_errors_with_inputs(self.test_subject.viewing_dir_field, ["error"])
+
+    def test_mute_error(self):
+
+        # Test error is caught.
+        val, err = self.test_subject.mute_errors(self.fake_invalid, "value")
+        self.assertEqual(err.pop(), ValidatorLogError("test error", ("fake field",)))
+        self.assertFalse(self.has_errors())
+
+        # Test fail fast is not triggered.
+        self.test_subject._IIIFValidator.fail_fast = True
+        try:
+            val, err = self.test_subject.mute_errors(self.test_subject.log_error, "fake field", "test error")
+        except FailFastException:
+            self.fail("FailFastException was raised.")
+        self.assertEqual(err.pop(), ValidatorLogError("test error", ("fake field",)))
+        self.assertFalse(self.has_errors())
+
+    def test_error_to_warning(self):
+        @self.test_subject.errors_to_warnings
+        def log_error(self, value):
+            self.log_error("fake field", "test error")
+
+        # Test that error was converted to warning properly.
+        log_error(self.test_subject, "value")
+        self.assertFalse(self.has_errors())
+        self.assertTrue(self.has_warnings())
+        self.assertEqual(self.test_subject.warnings.pop(), ValidatorLogWarning("(error coerced to warning) test error", ("fake field",)))
+
+        # Test that fail fast is not triggered.
+        self.test_subject._IIIFValidator.fail_fast = True
+        try:
+            log_error(self.test_subject, "value")
+        except FailFastException:
+            self.fail("FailFastException was raised.")
+        self.assertTrue(self.has_warnings())
+        self.assertFalse(self.has_errors())
+
+    def test_warning_to_error(self):
+        @self.test_subject.warnings_to_errors
+        def log_warning(self, value):
+            self.log_warning("fake field", "test error")
+
+        # Test that warning is converted to error properly
+        log_warning(self.test_subject, "value")
+        self.assertTrue(self.has_errors())
+        self.assertFalse(self.has_warnings())
+        self.assertEqual(self.test_subject.errors.pop(), ValidatorLogError("(warning coerced to error) test error", ("fake field",)))
+

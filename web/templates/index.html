@@ -8,7 +8,7 @@
 <body class="site">
 <div class="site-content">
     <h1>Validate with Tripoli.</h1>
-    <form class="pure-form" action="/" method="post">
+    <form class="pure-form" action="/" method="get">
         <fieldset>
             <button type="submit" class="pure-button pure-button-primary" style="float: right">Validate</button>
             <div style="overflow: hidden; padding-right: .5em;">
@@ -21,9 +21,9 @@
     {% endif %}
 
     {% if is_valid == True %}
-        <p style="color:darkolivegreen">Manifest passed validation.</p>
+        <strong style="color:darkolivegreen">Manifest passed validation.</strong>
     {% elif is_valid == False %}
-        <p style="color:red">Manifest failed validation.</p>
+        <strong style="color:red">Manifest failed validation.</strong>
     {% endif %}
 
     <ul class="output">
