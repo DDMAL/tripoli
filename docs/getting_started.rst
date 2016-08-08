@@ -52,3 +52,29 @@ The complete interface can be found in the :doc:`api guide </api>`.
 Tripoli can also be configured to log extra warnings, ignore particular
 errors, and correct errors in manifests. Refer to the :doc:`configuration section</configuration>`
 for more information.
+
+
+Validating Online
+-----------------
+
+You can use tripoli to validate online at https://validate.musiclibs.net. Simply pass in a link to a manifest
+as a query parameter named 'manifest'. ::
+
+    >>> curl "https://validate.musiclibs.net/?manifest=${MANIFEST_URL}" -H "Accept: application/json"
+    {
+      "errors": [
+        "Error: '@context' must be set to 'http://iiif.io/api/presentation/2/context.json' @ data['@context']",
+        "Error: @context field not allowed in embedded sequence. @ data['sequences']['@context']",
+        "Error: Key 'on' is required in 'annotation' @ data['sequences']['canvases']['images']['on']"
+      ],
+      "is_valid": false,
+      "manifest_url": ${MANIFEST_URL},
+      "warnings": [
+        "Warning: thumbnail SHOULD be IIIF image service. @ data['thumbnail']",
+        "Warning: manifest SHOULD have description field. @ data['description']",
+        "Warning: logo SHOULD be IIIF image service. @ data['logo']",
+        "Warning: Unknown key '@context' in 'sequence' @ data['sequences']['@context']",
+        "Warning: Unknown key '@context' in 'annotation' @ data['sequences']['canvases']['images']['@context']"
+      ]
+    }
+
