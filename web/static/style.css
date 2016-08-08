@@ -8,7 +8,7 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 50px;
-    min-width:50em;
+    width:50em;
     flex: 1;
 }
 
@@ -17,7 +17,7 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 30px;
-    min-width: 50em;
+    width: 50em;
     padding-bottom: 1em;
     text-align: center;
 }
