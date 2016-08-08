@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Tripoli by DDMAL</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Tripoli</h1>
+        <p>IIIF document validation with correction.</p>
+
+        <p class="view"><a href="https://github.com/DDMAL/tripoli">View the Project on GitHub <small>DDMAL/tripoli</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/DDMAL/tripoli/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/DDMAL/tripoli/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/DDMAL/tripoli">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>Tripoli is a validator for documents conforming to the <a href="http://iiif.io/api/presentation/2.1/">IIIF presentation API 2.1</a>. It makes it easy to validate documents, apply provider specific heuristics, and even correct documents while they are being validated.</p>
+
+<h3>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Documentation</h3>
+
+<p>Detailed documentation is available at <a href="http://tripoli.readthedocs.io/en/latest/">http://tripoli.readthedocs.io/en/latest/</a></p>
+
+<h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>You can install Tripoli using pip.</p>
+
+<div class="highlight highlight-source-shell"><pre><span class="pl-k">&gt;</span> pip install tripoli</pre></div>
+
+<h3>
+<a id="quick-start" class="anchor" href="#quick-start" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick start</h3>
+
+<p>Once installed, it's easy to start validating. Tripoli can validate the entire document, and will log informative errors and warnings with helpful paths.</p>
+
+<div class="highlight highlight-source-python"><pre><span class="pl-k">&gt;&gt;</span><span class="pl-k">&gt;</span> <span class="pl-k">from</span> tripoli <span class="pl-k">import</span> IIIFValidator
+
+<span class="pl-k">&gt;&gt;</span><span class="pl-k">&gt;</span> iv <span class="pl-k">=</span> IIIFValidator()
+<span class="pl-k">&gt;&gt;</span><span class="pl-k">&gt;</span> iv.validate(some_manifest)
+    Error: Field has no <span class="pl-s"><span class="pl-pds">'</span>@language<span class="pl-pds">'</span></span> key where one <span class="pl-k">is</span> required. <span class="pl-k">@</span> data[<span class="pl-s"><span class="pl-pds">'</span>metadata<span class="pl-pds">'</span></span>][<span class="pl-s"><span class="pl-pds">'</span>value<span class="pl-pds">'</span></span>]
+    Error: viewingHint <span class="pl-s"><span class="pl-pds">'</span>pages<span class="pl-pds">'</span></span> <span class="pl-k">is</span> <span class="pl-k">not</span> valid <span class="pl-k">and</span> <span class="pl-k">not</span> uri. <span class="pl-k">@</span> data[<span class="pl-s"><span class="pl-pds">'</span>sequences<span class="pl-pds">'</span></span>][<span class="pl-s"><span class="pl-pds">'</span>canvases<span class="pl-pds">'</span></span>][<span class="pl-s"><span class="pl-pds">'</span>viewingHint<span class="pl-pds">'</span></span>]
+    <span class="pl-c1">Warning</span>: logo <span class="pl-c1">SHOULD</span> be <span class="pl-c1">IIIF</span> image service. <span class="pl-k">@</span> data[<span class="pl-s"><span class="pl-pds">'</span>logo<span class="pl-pds">'</span></span>]
+    <span class="pl-c1">Warning</span>: manifest <span class="pl-c1">SHOULD</span> have thumbnail field. <span class="pl-k">@</span> data[<span class="pl-s"><span class="pl-pds">'</span>thumbnail<span class="pl-pds">'</span></span>]
+    <span class="pl-c1">Warning</span>: Unknown key <span class="pl-s"><span class="pl-pds">'</span>see_also<span class="pl-pds">'</span></span> <span class="pl-k">in</span> <span class="pl-s"><span class="pl-pds">'</span>manifest<span class="pl-pds">'</span></span> <span class="pl-k">@</span> data[<span class="pl-s"><span class="pl-pds">'</span>see_also<span class="pl-pds">'</span></span>]
+    <span class="pl-c1">Warning</span>: ImageResource <span class="pl-c1">SHOULD</span> have <span class="pl-k">@</span><span class="pl-c1">id</span> field. <span class="pl-k">@</span> data[<span class="pl-s"><span class="pl-pds">'</span>sequences<span class="pl-pds">'</span></span>][<span class="pl-s"><span class="pl-pds">'</span>canvases<span class="pl-pds">'</span></span>][<span class="pl-s"><span class="pl-pds">'</span>images<span class="pl-pds">'</span></span>][<span class="pl-s"><span class="pl-pds">'</span>@id<span class="pl-pds">'</span></span>]</pre></div>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/DDMAL">DDMAL</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
