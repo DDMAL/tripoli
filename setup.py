@@ -32,5 +32,14 @@ setup(
     url='https://github.com/DDMAL/tripoli',
     download_url='https://github.com/DDMAL/tripoli/tarball/master',
     keywords=['validator', 'IIIF'],
-    classifiers=[],
+    classifiers=[
+        "License :: OSI Approved :: MIT License",
+        "Development Status :: 5 - Production/Stable",
+        "Operating System :: OS Independent",
+        "Topic :: Software Development :: Quality Assurance",
+        "Topic :: Multimedia :: Graphics :: Presentation",
+        "Intended Audience :: Developers",
+        "Environment :: Web Environment",
+        "Programming Language :: Python"],
+    test_suite='tests'
 )

@@ -47,7 +47,7 @@ The ``IIIFValidator`` has a number of options to control its behaviour.
     :noindex:
     :members: collect_errors, collect_warnings, debug, fail_fast
 
-The complete interface can be found in the :doc:`api guide </api>`.
+The complete interface can be found in the :doc:`API guide </api>`.
 
 Tripoli can also be configured to log extra warnings, ignore particular
 errors, and correct errors in manifests. Refer to the :doc:`configuration section</configuration>`
