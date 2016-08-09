@@ -29,7 +29,6 @@ class AnnotationValidator(BaseValidator):
                         "last", "total", "next", "prev", "startIndex", "collections", "manifests", "members",
                         "sequences", "structures", "canvases", "resources", "otherContent", "images", "ranges"}
     REQUIRED_FIELDS = {"@type", "on", "motivation"}
-    RECOMMENDED_FIELDS = {"@id"}
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
