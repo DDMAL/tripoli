@@ -165,19 +165,18 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         self.assert_errors_with_inputs(self.test_subject.viewing_dir_field, ["error"])
 
     def test_mute_error(self):
-
         # Test error is caught.
         val, err = self.test_subject.mute_errors(self.fake_invalid, "value")
-        self.assertEqual(err.pop(), ValidatorLogError("test error", ("fake field",)))
+        self.assertIn(ValidatorLogError('test error', ('fake field',)), err)
         self.assertFalse(self.has_errors())
 
         # Test fail fast is not triggered.
         self.test_subject._IIIFValidator.fail_fast = True
         try:
-            val, err = self.test_subject.mute_errors(self.test_subject.log_error, "fake field", "test error")
+            val, err = self.test_subject.mute_errors(self.fake_invalid, "value")
         except FailFastException:
             self.fail("FailFastException was raised.")
-        self.assertEqual(err.pop(), ValidatorLogError("test error", ("fake field",)))
+        self.assertIn(ValidatorLogError('test error', ('fake field',)), err)
         self.assertFalse(self.has_errors())
 
     def test_error_to_warning(self):
@@ -189,7 +188,7 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         log_error(self.test_subject, "value")
         self.assertFalse(self.has_errors())
         self.assertTrue(self.has_warnings())
-        self.assertEqual(self.test_subject.warnings.pop(), ValidatorLogWarning("(error coerced to warning) test error", ("fake field",)))
+        self.assertEqual(self.test_subject.warnings.pop(), ValidatorLogWarning('test error', ('fake field',)))
 
         # Test that fail fast is not triggered.
         self.test_subject._IIIFValidator.fail_fast = True
@@ -209,5 +208,5 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         log_warning(self.test_subject, "value")
         self.assertTrue(self.has_errors())
         self.assertFalse(self.has_warnings())
-        self.assertEqual(self.test_subject.errors.pop(), ValidatorLogError("(warning coerced to error) test error", ("fake field",)))
+        self.assertEqual(self.test_subject.errors.pop(), ValidatorLogError('test error', ('fake field',)))
 

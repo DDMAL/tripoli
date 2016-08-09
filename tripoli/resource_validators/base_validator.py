@@ -86,39 +86,39 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     @staticmethod
     def errors_to_warnings(fn):
-        """Cast any errors to warnings on any ``*_field`` or ``*_type`` function."""
+        """Cast any errors to warnings on any ``*_field`` or ``*_type`` function.
 
+        Works by patching the BaseValidator.log_error to refer to
+        BaseValidator.log_warning. These methods should not be
+        overridden in children.
+        """
         def coerce_errors(*args, **kwargs):
-            self = args[0]
-            old_errors = set(self.errors)
-            old_fail_fast = self.fail_fast
+            old_log_error = BaseValidator.log_error
             try:
-                self._IIIFValidator.fail_fast = False
+                BaseValidator.log_error = BaseValidator.log_warning
                 val = fn(*args, **kwargs)
             finally:
-                self._IIIFValidator.fail_fast = old_fail_fast
-            new_errors = set(self.errors)
-            diff = new_errors - old_errors
-            for err in diff:
-                self.log_warning(err.path[-1], "(error coerced to warning) {}".format(err.msg))
-            self._errors = old_errors
+                BaseValidator.log_error = old_log_error
             return val
 
         return coerce_errors
 
     @staticmethod
     def warnings_to_errors(fn):
-        """Cast any warnings to errors on any ``*_field`` or ``*_type`` function."""
+        """Cast any warnings to errors on any ``*_field`` or ``*_type`` function.
+
+        Works by patching the BaseValidator.log_warning to refer to
+        BaseValidator.log_error. These methods should not be
+        overridden in children.
+        """
 
         def coerce_warnings(*args, **kwargs):
-            self = args[0]
-            old_warnings = set(self.warnings)
-            val = fn(*args, **kwargs)
-            new_warnings = set(self.warnings)
-            diff = new_warnings - old_warnings
-            for err in diff:
-                self.log_error(err.path[-1], "(warning coerced to error) {}".format(err.msg))
-            self._warnings = old_warnings
+            old_log_warning = BaseValidator.log_warning
+            try:
+                BaseValidator.log_warning = BaseValidator.log_error
+                val = fn(*args, **kwargs)
+            finally:
+                BaseValidator.log_warning = old_log_warning
             return val
 
         return coerce_warnings
@@ -144,19 +144,22 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
         The self._errors key will not be changed by using this function.
 
-        The fail_fast option is temporarily set to false while the function
-        is run.
+        Works by patching the BaseValidator.log_error function.
+        BaseValidator.log_error should not be overridden in children.
         """
-        errors = set(self._errors)
-        old_fail_fast = self.fail_fast
+        caught_errors = set()
+
+        def patched_log_error(self, field, msg):
+            tb = traceback.extract_stack()[:-1] if self.debug else None
+            caught_errors.add(ValidatorLogError(msg, self._path + (field,), tb))
+
+        old_log_error = BaseValidator.log_error
         try:
-            self._IIIFValidator.fail_fast = False
+            BaseValidator.log_error = patched_log_error
             val = fn(*args, **kwargs)
         finally:
-            self._IIIFValidator.fail_fast = old_fail_fast
-        diff = self._errors - errors
-        self._errors = errors
-        return val, diff
+            BaseValidator.log_error = old_log_error
+        return val, caught_errors
 
     def _reset(self, path):
         """Reset the validator to handle a new chunk of data."""
@@ -237,6 +240,9 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     def log_warning(self, field, msg):
         """Add a warning to the validator if warnings are being caught.
 
+        This method should not be overridden in subclasses, as doing so
+        is likely to break the error and warning coercion decorators.
+
         :param field: The field the warning was raised on.
         :param msg: The message to associate with the warning.
         """
@@ -246,6 +252,9 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     def log_error(self, field, msg):
         """Add an error to the validator.
+
+        This method should not be overridden in subclasses, as doing so
+        is likely to break the error and warning coercion decorators.
 
         :param field: The field the error was raised on.
         :param msg: The message to associate with the error.
