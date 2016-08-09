@@ -41,4 +41,5 @@ setup(
         "Intended Audience :: Developers",
         "Environment :: Web Environment",
         "Programming Language :: Python"],
+    test_suite='tests'
 )
