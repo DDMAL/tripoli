@@ -64,6 +64,11 @@ class IIIFValidator(SubValidationMixin):
         #: will be placed here.
         self.corrected_doc = {}
 
+        #: If ``True``, prints all errors and warnings as they occur.
+        #: If ``False``, errors and warnings only printed after de-duplication.
+        #: Default ``False``.
+        self.verbose = False
+
         self._setup_to_validate()
 
     @property

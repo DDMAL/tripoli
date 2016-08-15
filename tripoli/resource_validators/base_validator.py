@@ -248,7 +248,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         """
         if self.collect_warnings:
             tb = traceback.extract_stack()[:-1] if self.debug else None
-            self._warnings.add(ValidatorLogWarning(msg, self._path + (field,), tb))
+            warn = ValidatorLogWarning(msg, self._path + (field,), tb)
+            if self.verbose:
+                self._IIIFValidator.logger.warning(str(warn))
+            self._warnings.add(warn)
 
     def log_error(self, field, msg):
         """Add an error to the validator.
@@ -261,7 +264,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         """
         if self.collect_errors:
             tb = traceback.extract_stack()[:-1] if self.debug else None
-            self._errors.add(ValidatorLogError(msg, self._path + (field,), tb))
+            err = ValidatorLogError(msg, self._path + (field,), tb)
+            if self.verbose:
+                self._IIIFValidator.logger.error(str(err))
+            self._errors.add(err)
         if self.fail_fast:
             raise FailFastException
 

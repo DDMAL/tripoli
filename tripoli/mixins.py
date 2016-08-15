@@ -22,6 +22,10 @@ class LinkedValidatorMixin:
         return self._IIIFValidator.fail_fast
 
     @property
+    def verbose(self):
+        return self._IIIFValidator.verbose
+
+    @property
     def ManifestValidator(self):
         return self._IIIFValidator._ManifestValidator
 
