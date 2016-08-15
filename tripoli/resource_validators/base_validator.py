@@ -504,8 +504,8 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         except ET.ParseError:
             field_is_valid_xml = False
 
-        # Check if field contains *any* xml style tgs.
-        field_contains_tags = True if field_is_valid_xml else bool(self.XML_REGEX.search(field))
+        # Check if field contains *any* xml style tags.
+        field_contains_tags = True if field_is_valid_xml else bool(self.XML_REGEX.search(value))
 
         # Return now if no tags are found.
         if not field_contains_tags:
@@ -518,7 +518,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
         # Log error and return if the HTML is malformed in some way.
         if field_contains_tags and not field_is_valid_xml:
-            self.log_error(field, "Contains tags but is not valid HTML.")
+            self.log_error(field, "Field contains tags but is not valid HTML.")
             return
 
         def check_html_element(elem):
