@@ -88,8 +88,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     HTML_FORBIDDEN_REGEX = re.compile(r'<({})>.*</\1>'.format("|".join(HTML_FORBIDDEN_TAGS)), re.DOTALL)
 
     # Catch all regex for XML in string.
-    XML_REGEX = re.compile(r'<([\w\-_.]*)>.*</\1>', re.DOTALL)
-
+    XML_REGEX = re.compile(r'<([^\s>]*)([^>]*/>|.*</\1>)', re.DOTALL)
 
     def __init__(self, iiif_validator=None):
         LinkedValidatorMixin.__init__(self, iiif_validator=iiif_validator)
