@@ -25,6 +25,9 @@ import traceback
 import urllib.parse
 import copy
 import uuid
+import re
+
+import defusedxml.ElementTree as ET
 
 from ..mixins import LinkedValidatorMixin, SubValidationMixin
 from ..validator_logging import ValidatorLogError, ValidatorLogWarning
@@ -66,6 +69,27 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         "label", "metadata", "description", "thumbnail", "attribution", "license", "logo",
         "@id", "@type", "viewingHint", "seeAlso", "service", "related", "rendering", "within"
     }
+
+    # The fields which are allowed to contain HTML.
+    HTML_ALLOWED_FIELDS = {'description', 'attribution', 'value', 'label', '@value'}
+
+    # The attributes allowed for each html field.
+    HTML_ALLOWED_ATTRIBUTES = {
+        'a': {'href'},
+        'img': {'src', 'alt'}
+    }
+
+    # The HTML tags which are allowed to appear in a text field.
+    HTML_ALLOWED_TAGS = {'a', 'b', 'br', 'i', 'img', 'p', 'span'}
+    HTML_ALLOWED_REGEX = re.compile(r'<({})>.*</\1>'.format("|".join(HTML_ALLOWED_TAGS)))
+
+    # The HTML tags which are expressly forbidden.
+    HTML_FORBIDDEN_TAGS = {'script', 'style', 'object', 'form', 'input'}
+    HTML_FORBIDDEN_REGEX = re.compile(r'<({})>.*</\1>'.format("|".join(HTML_FORBIDDEN_TAGS)))
+
+    # Catch all regex for XML in string.
+    XML_REGEX = re.compile(r'<(.*)>.*</\1>')
+
 
     def __init__(self, iiif_validator=None):
         LinkedValidatorMixin.__init__(self, iiif_validator=iiif_validator)
@@ -342,7 +366,6 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         self._check_unknown_fields(resource, r_dict, self.KNOWN_FIELDS)
         return self._check_common_fields(r_dict)
 
-
     # Field definitions #
     def _optional(self, field, fn):
         """Wrap a function to make its value optional (null and '' allows)"""
@@ -366,6 +389,8 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         Allows for repeated strings as per 5.3.2.
         """
         if isinstance(value, str):
+            # Check for invalid and forbidden html.
+            self.__check_html(field, value)
             return value
         if isinstance(value, list):
             return [self._str_or_val_lang_type(field, val) for val in value]
@@ -383,6 +408,8 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     def _repeatable_string_type(self, field, value):
         """Allows for repeated strings as per 5.3.2."""
         if isinstance(value, str):
+            # Check for invalid and forbidden html.
+            self.__check_html(field, value)
             return value
         if isinstance(value, list):
             for val in value:
@@ -438,6 +465,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         if not isinstance(value, str):
             self.log_error(field, "URI is not string: '{}'".format(value))
             return value
+
+        # Check for invalid and forbidden html.
+        self.__check_html(field, value)
+
         # Try to parse the url.
         try:
             pieces = urllib.parse.urlparse(value)
@@ -449,6 +480,76 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         if http and pieces.scheme not in ['http', 'https']:
             self.log_error(field, "URI must be http: '{}'".format(value))
         return value
+
+    def __check_html(self, field, value):
+        """Check that the value does not contain html where not allowed.
+
+        Logs a warning if any tag not in HTML_ALLOWED_TAGS is present.
+        Logs an error if any tag in HTML_FORBIDDEN_TAGS is present.
+        Logs an error if any html tag is found in a field not in HTML_ALLOWEd_FIELDS.
+        """
+
+        # Bool marking if this field is allowed to have html.
+        field_allowed_html = field in self.HTML_ALLOWED_FIELDS
+
+        # Bool marking if this field contains valid xml markup.
+        field_is_valid_xml = False
+
+        # Bool marking if this field contains any tags.
+        field_contains_tags = False
+
+        # Try to parse the field and record if the field is valid xml.
+        try:
+            et = ET.fromstring(value)
+            field_is_valid_xml = True
+        except ET.ParseError:
+            field_is_valid_xml = False
+
+        # Check if field contains *any* xml style tgs.
+        field_contains_tags = True if field_is_valid_xml else bool(self.XML_REGEX.search(field))
+
+        # Return now if no tags are found.
+        if not field_contains_tags:
+            return
+
+        # Log error and return if this field is not allowed to have HTML in it.
+        if (field_is_valid_xml or field_contains_tags) and not field_allowed_html:
+            self.log_error(field, "HTML not allowed in this field.")
+            return
+
+        # Log error and return if the HTML is malformed in some way.
+        if field_contains_tags and not field_is_valid_xml:
+            self.log_error(field, "Contains tags but is not valid HTML.")
+            return
+
+        def check_html_element(elem):
+            """Recursively validate elements in etree."""
+            tag, attributes = elem.tag, elem.attrib.keys()
+
+            # Log error and return if tag is forbidden.
+            if tag in self.HTML_FORBIDDEN_TAGS:
+                self.log_error(field, "Forbidden tag '<{}>' in html.".format(tag))
+                return False
+
+            # Log error and return if forbidden attributes are present.
+            allowed_attributes = self.HTML_ALLOWED_ATTRIBUTES.get(tag, set())
+            for attr in attributes:
+                if attr not in allowed_attributes:
+                    self.log_error(field, "HTML tag '<{}>' not allowed attribute '{}'.".format(tag, attr))
+                    return False
+
+            # Log warning if tag is not explicitly mentioned as being safe.
+            if tag not in self.HTML_ALLOWED_TAGS:
+                self.log_warning(field, "HTML tag '{}' of uncertain validity "
+                                        "(valid tags are <a>, <b>, <br>, <i>, <img>, <p>, and <span>)")
+
+            for child_elem in elem:
+                child_valid = check_html_element(child_elem)
+                if not child_valid:
+                    return False
+            return True
+
+        check_html_element(et)
 
     # Common field definitions.
     def id_field(self, value):
