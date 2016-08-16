@@ -75,6 +75,7 @@ class SequenceValidator(BaseValidator):
         return value
 
     def context_field(self, value):
+        """Assert that ``@context`` is the IIIF 2.0 presentation API if it is allowed."""
         if self.emb:
             self.log_error("@context", "@context field not allowed in embedded sequence.")
             return value
