@@ -29,7 +29,7 @@ class _Path:
         :param path: Tuple of strings and ints.
         """
         self._path = path
-        self._no_index_path = tuple(filter(lambda x: isinstance(x, str), self._path))
+        self.__no_index_path = None
 
     def __eq__(self, other):
         return self._path == other._path
@@ -55,9 +55,11 @@ class _Path:
             return _Path(self._path + other._path)
         raise NotImplemented
 
-    def no_index(self):
-        """Return Path with indexes ignored."""
-        return _Path(self._no_index_path)
+    @property
+    def _no_index_path(self):
+        if self.__no_index_path is None:
+            self.__no_index_path = tuple(filter(lambda x: isinstance(x, str), self._path))
+        return self.__no_index_path
 
     def no_index_eq(self, other):
         """Return true if paths are the same, ignoring indexes.
@@ -113,11 +115,11 @@ class ValidatorLogEntry:
         return len(self.path) < len(other.path)
 
     def __hash__(self):
-
-        return hash(str(self))
+        return hash(str(self.path._no_index_path) + self.msg)
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        return self.path._no_index_path == other.path._no_index_path\
+                and self.msg == other.msg
 
 
 class ValidatorLogWarning(ValidatorLogEntry):
