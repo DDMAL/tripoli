@@ -499,17 +499,15 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         field_is_valid_xml = False
 
         # Bool marking if this field contains any tags.
-        field_contains_tags = False
+        field_contains_tags = bool(self.XML_REGEX.search(value))
 
         # Try to parse the field and record if the field is valid xml.
-        try:
-            et = ET.fromstring(value)
-            field_is_valid_xml = True
-        except ET.ParseError:
-            field_is_valid_xml = False
-
-        # Check if field contains *any* xml style tags.
-        field_contains_tags = True if field_is_valid_xml else bool(self.XML_REGEX.search(value))
+        if field_contains_tags:
+            try:
+                et = ET.fromstring(value)
+                field_is_valid_xml = True
+            except ET.ParseError:
+                field_is_valid_xml = False
 
         # Return now if no tags are found.
         if not field_contains_tags:
