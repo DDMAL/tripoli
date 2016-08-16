@@ -113,11 +113,11 @@ class ValidatorLogEntry:
         return len(self.path) < len(other.path)
 
     def __hash__(self):
-
-        return hash(str(self))
+        return hash(str(self.path.no_index()) + self.msg)
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        return str(self.path.no_index()) == str(other.path.no_index())\
+            and self.msg == other.msg
 
 
 class ValidatorLogWarning(ValidatorLogEntry):
