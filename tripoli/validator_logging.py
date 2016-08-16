@@ -19,6 +19,43 @@
 # THE SOFTWARE.
 
 import traceback
+from itertools import zip_longest
+
+
+class _Path:
+    """Class representing path within document."""
+    def __init__(self, path):
+        """ Create a Path.
+
+        :param path: Tuple of strings and ints.
+        """
+        self._path = path
+
+    def __eq__(self, other):
+        return self._path == other._path
+
+    def __len__(self):
+        return len(self._path)
+
+    def __str__(self):
+        return ' @ data[%s]' % ']['.join(map(repr, self._path)) if self._path else ''
+
+    def __repr__(self):
+        return '_Path({})'.format(", ".join(repr(x) for x in self._path))
+
+    def ignore_index_path(self):
+        """Return Path with indexes ignored."""
+        return _Path(tuple(filter(lambda x: isinstance(x, str), self._path)))
+
+    def ignore_index_eq(self, other):
+        """Return true if paths are the same, ignoring indexes.
+
+        Useful for hashing, as we typically only care about storing
+        one instance of each error/warning per list.
+        """
+        p1 = self.ignore_index_path()
+        p2 = other.ignore_index_path()
+        return p1 == p2
 
 
 class ValidatorLogEntry:
@@ -36,7 +73,7 @@ class ValidatorLogEntry:
         self.msg = msg
 
         #: A tuple representing the path where the entry was created.
-        self.path = path
+        self.path = _Path(path)
 
         self._tb = tb if tb else []
 
@@ -45,7 +82,7 @@ class ValidatorLogEntry:
         traceback.print_list(self._tb)
 
     def path_str(self):
-        return ' @ data[%s]' % ']['.join(map(repr, self.path)) if self.path else ''
+        return str(self.path)
 
     def log_str(self):
         return self.msg + self.path_str()
@@ -54,6 +91,7 @@ class ValidatorLogEntry:
         return len(self.path) < len(other.path)
 
     def __hash__(self):
+
         return hash(str(self))
 
     def __eq__(self, other):
