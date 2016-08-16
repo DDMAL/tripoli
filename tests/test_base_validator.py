@@ -1,8 +1,9 @@
 from .validator_testing_tools import ValidatorTestingTools
 from tripoli import IIIFValidator
 from tripoli.resource_validators.base_validator import BaseValidator
-from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning
+from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning, _Path
 from tripoli.exceptions import FailFastException
+
 
 class TestBaseValidatorMixin(ValidatorTestingTools):
 
@@ -163,6 +164,19 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         self.assert_errors_with_inputs(self.test_subject.viewing_hint_field, ["error"])
         self.assert_no_errors_with_inputs(self.test_subject.viewing_dir_field, ["paged", "non-paged"])
         self.assert_errors_with_inputs(self.test_subject.viewing_dir_field, ["error"])
+
+    def test_html_validation(self):
+        valid_inputs = {
+            (_Path(('metadata',)), 'labels', "<a href='http://google.ca'>Google</a>"),
+            (_Path(('sequences', 0, 'metadata')), 'value', "<span><p>Test</p></span>"),
+            (_Path(tuple()), 'description', "<p><br/></p>"),
+            (_Path(tuple()), 'attribution', "<img src='fake source'/>")
+        }
+
+        for p, f, v in valid_inputs:
+            self.test_subject._path = p
+            self.test_subject._check_html(f, v)
+            self.assertFalse(self.has_warnings_or_errors(), self.test_subject.errors + self.test_subject.warnings)
 
     def test_mute_error(self):
         # Test error is caught.

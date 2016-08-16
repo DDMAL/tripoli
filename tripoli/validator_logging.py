@@ -55,6 +55,9 @@ class _Path:
             return _Path(self._path + other._path)
         raise NotImplemented
 
+    def __hash__(self):
+        return hash(self._path)
+
     @property
     def _no_index_path(self):
         if self.__no_index_path is None:
