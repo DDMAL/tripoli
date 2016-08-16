@@ -69,6 +69,11 @@ class IIIFValidator(SubValidationMixin):
         #: Default ``False``.
         self.verbose = False
 
+        #: If ``True``, only one instance of duplicate logged messages will be saved.
+        #: If ``False``, all logged messages will be saved.
+        #: Default ``True``.
+        self.unique_logging = True
+
         self._setup_to_validate()
 
     @property
