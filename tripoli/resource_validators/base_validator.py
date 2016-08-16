@@ -492,8 +492,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         Logs an error if any tag in HTML_FORBIDDEN_TAGS is present.
         Logs an error if any html tag is found in a field not in HTML_ALLOWEd_FIELDS.
         """
-        # Bool marking if this field is allowed to have html.
-        field_allowed_html = field in self.HTML_ALLOWED_FIELDS
+        # Disregarding indices in paths, check if the suffix of the current path
+        # is one which can validly contain html.
+        temp_path = self._path + field
+        field_allowed_html = any(temp_path.no_index_endswith(x) for x in self.HTML_ALLOWED_FIELDS)
 
         # Bool marking if this field contains valid xml markup.
         field_is_valid_xml = False
