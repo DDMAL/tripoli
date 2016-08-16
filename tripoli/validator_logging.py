@@ -19,7 +19,6 @@
 # THE SOFTWARE.
 
 import traceback
-from itertools import zip_longest
 
 
 class _Path:
@@ -30,6 +29,7 @@ class _Path:
         :param path: Tuple of strings and ints.
         """
         self._path = path
+        self._no_index_path = tuple(filter(lambda x: isinstance(x, str), self._path))
 
     def __eq__(self, other):
         return self._path == other._path
@@ -43,19 +43,41 @@ class _Path:
     def __repr__(self):
         return '_Path({})'.format(", ".join(repr(x) for x in self._path))
 
-    def ignore_index_path(self):
-        """Return Path with indexes ignored."""
-        return _Path(tuple(filter(lambda x: isinstance(x, str), self._path)))
+    def __iter__(self):
+        return self._path.__iter__()
 
-    def ignore_index_eq(self, other):
+    def __add__(self, other):
+        if isinstance(other, (str, int)):
+            return _Path(self._path + (other,))
+        if isinstance(other, tuple):
+            return _Path(self._path + other)
+        if isinstance(other, _Path):
+            return _Path(self._path + other._path)
+        raise NotImplemented
+
+    def no_index(self):
+        """Return Path with indexes ignored."""
+        return _Path(self._no_index_path)
+
+    def no_index_eq(self, other):
         """Return true if paths are the same, ignoring indexes.
 
         Useful for hashing, as we typically only care about storing
         one instance of each error/warning per list.
         """
-        p1 = self.ignore_index_path()
-        p2 = other.ignore_index_path()
-        return p1 == p2
+        return self._no_index_path == other._no_index_path
+
+    def no_index_endswith(self, path):
+        """Return true is self._no_index_path has ``path`` as a suffix.
+
+        :param path: Either a str-tuple or a _Path.
+        """
+        if isinstance(path, _Path):
+            path = path._no_index_path
+        for a, b in zip(reversed(self._no_index_path), reversed(path)):
+            if a != b:
+                return False
+        return True
 
 
 class ValidatorLogEntry:
