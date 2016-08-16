@@ -624,22 +624,32 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
         Recurse into keys/values and checks that they are properly formatted.
         """
-        if isinstance(value, list):
-            with self._temp_path(self._path + ("metadata",)):
-                for m in value:
-                    if isinstance(m, dict):
-                        if "label" not in m:
-                            self.log_error("label", "metadata entries must have labels.")
-                        elif "value" not in m:
-                            self.log_error("value", "metadata entries must have values")
-                        else:
-                            self._str_or_val_lang_type("value", m.get("value"))
-                            self._str_or_val_lang_type("label", m.get("label"))
-                    else:
-                        self.log_error("value", "Entries must be dictionaries.")
+        if not isinstance(value, list):
+            self.log_error("metadata", "Metadata MUST be a list")
             return value
-        self.log_error("metadata", "Metadata MUST be a list")
-        return value
+
+        result = []
+        with self._temp_path(self._path + ("metadata",)):
+            for i, m in enumerate(value):
+                with self._temp_path(self._path + i):
+                    result.append(self._metadata_entry(m))
+        return result
+
+    def _metadata_entry(self, value):
+        if not isinstance(value, dict):
+            self.log_error("value", "Entries must be dictionaries.")
+            return value
+        if "label" not in value:
+            self.log_error("label", "metadata entries must have labels.")
+            return value
+        elif "value" not in value:
+            self.log_error("value", "metadata entries must have values")
+            return value
+        else:
+            return {
+                'label': self._str_or_val_lang_type("label", value.get("label")),
+                'value': self._str_or_val_lang_type("value", value.get("value"))
+            }
 
     def thumbnail_field(self, value):
         """Validate the ``thumbnail`` field of the resource."""
