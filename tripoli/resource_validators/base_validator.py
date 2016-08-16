@@ -81,11 +81,9 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     # The HTML tags which are allowed to appear in a text field.
     HTML_ALLOWED_TAGS = {'a', 'b', 'br', 'i', 'img', 'p', 'span'}
-    HTML_ALLOWED_REGEX = re.compile(r'<({})>.*</\1>'.format("|".join(HTML_ALLOWED_TAGS)), re.DOTALL)
 
     # The HTML tags which are expressly forbidden.
     HTML_FORBIDDEN_TAGS = {'script', 'style', 'object', 'form', 'input'}
-    HTML_FORBIDDEN_REGEX = re.compile(r'<({})>.*</\1>'.format("|".join(HTML_FORBIDDEN_TAGS)), re.DOTALL)
 
     # Catch all regex for XML in string.
     XML_REGEX = re.compile(r'<([^\s>]*)([^>]*/>|.*</\1>)', re.DOTALL)
