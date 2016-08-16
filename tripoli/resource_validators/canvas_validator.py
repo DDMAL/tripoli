@@ -58,7 +58,6 @@ class CanvasValidator(BaseValidator):
 
     def type_field(self, value):
         """Assert that ``@type == 'sc:Canvas``"""
-        self.log_warning('type', 'test')
         if value != "sc:Canvas":
             self.log_error("@type", "@type must be 'sc:Canvas'.")
         return value
