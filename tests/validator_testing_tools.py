@@ -22,7 +22,7 @@ class ValidatorTestingTools(unittest.TestCase):
         return bool(self.test_subject._warnings)
 
     def has_warnings_or_errors(self):
-        return not (bool(self.test_subject._warnings) or bool(self.test_subject._errors))
+        return (bool(self.test_subject._warnings) or bool(self.test_subject._errors))
 
     def clear_errors(self):
         self.test_subject._errors = set()
