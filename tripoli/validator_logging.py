@@ -121,7 +121,6 @@ class ValidatorLogEntry:
         return self.path._no_index_path == other.path._no_index_path\
                 and self.msg == other.msg
 
-
 class ValidatorLogWarning(ValidatorLogEntry):
     """Class to hold and present warnings."""
 

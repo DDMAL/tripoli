@@ -492,7 +492,6 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         Logs an error if any tag in HTML_FORBIDDEN_TAGS is present.
         Logs an error if any html tag is found in a field not in HTML_ALLOWEd_FIELDS.
         """
-
         # Bool marking if this field is allowed to have html.
         field_allowed_html = field in self.HTML_ALLOWED_FIELDS
 
