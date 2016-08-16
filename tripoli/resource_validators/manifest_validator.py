@@ -73,10 +73,16 @@ class ManifestValidator(BaseValidator):
 
         Checks that exactly 1 sequence is embedded.
         """
-        path = self._path + ("sequences",)
         if not isinstance(value, list):
             self.log_error("sequences", "'sequences' MUST be a list")
             return value
-        lst = [self._sub_validate(self.SequenceValidator, value[0], path, emb=True)]
-        lst.extend([self._sub_validate(self.SequenceValidator, value[s], path, emb=False) for s in lst[1:]])
-        return lst
+
+        results = []
+        path = self._path + ("sequences",)
+        for i, seq in enumerate(value):
+            temp_path = path + i
+            if i == 0:
+                results.append(self._sub_validate(self.SequenceValidator, seq, temp_path, emb=True))
+            else:
+                results.append(self._sub_validate(self.SequenceValidator, seq, temp_path, emb=False))
+        return results

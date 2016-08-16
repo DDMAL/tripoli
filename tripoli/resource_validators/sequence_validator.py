@@ -96,4 +96,8 @@ class SequenceValidator(BaseValidator):
             self.log_error("canvases", "'canvases' MUST have at least one entry")
             return value
         path = self._path + ("canvases",)
-        return [self._sub_validate(self.CanvasValidator, c, path) for c in value]
+        results = []
+        for i, canvas in enumerate(value):
+            temp_path = path + i
+            results.append(self._sub_validate(self.CanvasValidator, canvas, temp_path))
+        return results

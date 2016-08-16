@@ -70,8 +70,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         "@id", "@type", "viewingHint", "seeAlso", "service", "related", "rendering", "within"
     }
 
-    # The fields which are allowed to contain HTML.
-    HTML_ALLOWED_FIELDS = {'description', 'attribution', 'value', 'label', '@value'}
+    # The path suffixes which are allowed to contain HTML.
+    HTML_ALLOWED_FIELDS = {('description',), ('attribution',),
+                           ('metadata', 'value'), ('metadata', 'label'),
+                           ('@value',)}
 
     # The attributes allowed for each html field.
     HTML_ALLOWED_ATTRIBUTES = {
@@ -392,7 +394,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         """
         if isinstance(value, str):
             # Check for invalid and forbidden html.
-            self.__check_html(field, value)
+            self._check_html(field, value)
             return value
         if isinstance(value, list):
             return [self._str_or_val_lang_type(field, val) for val in value]
@@ -411,7 +413,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         """Allows for repeated strings as per 5.3.2."""
         if isinstance(value, str):
             # Check for invalid and forbidden html.
-            self.__check_html(field, value)
+            self._check_html(field, value)
             return value
         if isinstance(value, list):
             for val in value:
@@ -469,7 +471,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             return value
 
         # Check for invalid and forbidden html.
-        self.__check_html(field, value)
+        self._check_html(field, value)
 
         # Try to parse the url.
         try:
@@ -483,7 +485,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             self.log_error(field, "URI must be http: '{}'".format(value))
         return value
 
-    def __check_html(self, field, value):
+    def _check_html(self, field, value):
         """Check that the value does not contain html where not allowed.
 
         Logs a warning if any tag not in HTML_ALLOWED_TAGS is present.

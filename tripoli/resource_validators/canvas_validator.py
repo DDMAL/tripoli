@@ -58,6 +58,7 @@ class CanvasValidator(BaseValidator):
 
     def type_field(self, value):
         """Assert that ``@type == 'sc:Canvas``"""
+        self.log_warning('type', 'test')
         if value != "sc:Canvas":
             self.log_error("@type", "@type must be 'sc:Canvas'.")
         return value
@@ -69,8 +70,12 @@ class CanvasValidator(BaseValidator):
         """
         if isinstance(value, list):
             path = self._path + ("images",)
-            return [self._sub_validate(self.AnnotationValidator, i, path,
-                                       canvas_uri=self.canvas_uri) for i in value]
+            results = []
+            for i, anno in enumerate(value):
+                temp_path = path + i
+                results.append(self._sub_validate(self.AnnotationValidator, anno, temp_path,
+                               canvas_uri=self.canvas_uri))
+            return results
         if not value:
             self.log_warning("images", "'images' SHOULD have values.")
             return value
