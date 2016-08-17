@@ -22,7 +22,7 @@ import traceback
 from itertools import zip_longest
 
 
-class _Path:
+class Path:
     """Class representing path within document."""
     def __init__(self, path):
         """ Create a Path.
@@ -42,18 +42,18 @@ class _Path:
         return ' @ data[%s]' % ']['.join(map(repr, self._path)) if self._path else ''
 
     def __repr__(self):
-        return '_Path({})'.format(", ".join(repr(x) for x in self._path))
+        return 'Path({})'.format(", ".join(repr(x) for x in self._path))
 
     def __iter__(self):
         return self._path.__iter__()
 
     def __add__(self, other):
         if isinstance(other, (str, int)):
-            return _Path(self._path + (other,))
+            return Path(self._path + (other,))
         if isinstance(other, tuple):
-            return _Path(self._path + other)
-        if isinstance(other, _Path):
-            return _Path(self._path + other._path)
+            return Path(self._path + other)
+        if isinstance(other, Path):
+            return Path(self._path + other._path)
         raise NotImplemented
 
     def __hash__(self):
@@ -76,9 +76,9 @@ class _Path:
     def no_index_endswith(self, path):
         """Return true is self._no_index_path has ``path`` as a suffix.
 
-        :param path: Either a str-tuple or a _Path.
+        :param path: Either a str-tuple or a Path.
         """
-        if isinstance(path, _Path):
+        if isinstance(path, Path):
             path = path._no_index_path
         for a, b in zip_longest(reversed(self._no_index_path), reversed(path)):
             if b is None:
@@ -103,7 +103,7 @@ class ValidatorLogEntry:
         self.msg = msg
 
         #: A tuple representing the path where the entry was created.
-        self.path = _Path(path)
+        self.path = Path(path)
 
         self._tb = tb if tb else []
 

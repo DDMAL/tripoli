@@ -1,7 +1,7 @@
 from .validator_testing_tools import ValidatorTestingTools
 from tripoli import IIIFValidator
 from tripoli.resource_validators.base_validator import BaseValidator
-from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning, _Path
+from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning, Path
 from tripoli.exceptions import FailFastException
 
 
@@ -168,10 +168,10 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
     def test_html_validation(self):
         # Valid (path, field, html-value) tuples
         valid_inputs = {
-            (_Path(('metadata',)), 'label', "<a href='http://google.ca'>Google</a>"),
-            (_Path(('sequences', 0, 'metadata')), 'value', "<span><p>Test</p></span>"),
-            (_Path(tuple()), 'description', "<p><br/></p>"),
-            (_Path(tuple()), 'attribution', "<img src='fake source'/>")
+            (Path(('metadata',)), 'label', "<a href='http://google.ca'>Google</a>"),
+            (Path(('sequences', 0, 'metadata')), 'value', "<span><p>Test</p></span>"),
+            (Path(tuple()), 'description', "<p><br/></p>"),
+            (Path(tuple()), 'attribution', "<img src='fake source'/>")
         }
 
         for p, f, v in valid_inputs:
@@ -181,10 +181,10 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
 
         # Invalid (path, field, html-value) tuples
         invalid_inputs = {
-            (_Path(tuple()), 'label', "<a href='http://google.ca'>Bad field</a>"),
-            (_Path(tuple()), 'description', "<script>Nasty scripting</script>"),
-            (_Path(tuple()), 'description', "<a target='something'>Bad attribute</a>"),
-            (_Path(tuple()), 'description', "this is <a>badly formatted.</a>"),
+            (Path(tuple()), 'label', "<a href='http://google.ca'>Bad field</a>"),
+            (Path(tuple()), 'description', "<script>Nasty scripting</script>"),
+            (Path(tuple()), 'description', "<a target='something'>Bad attribute</a>"),
+            (Path(tuple()), 'description', "this is <a>badly formatted.</a>"),
         }
 
         for p, f, v in invalid_inputs:

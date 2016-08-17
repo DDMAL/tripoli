@@ -30,7 +30,7 @@ import re
 import defusedxml.ElementTree as ET
 
 from ..mixins import LinkedValidatorMixin, SubValidationMixin
-from ..validator_logging import ValidatorLogError, ValidatorLogWarning, _Path
+from ..validator_logging import ValidatorLogError, ValidatorLogWarning, Path
 from ..exceptions import FailFastException
 
 
@@ -93,7 +93,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     def __init__(self, iiif_validator=None):
         LinkedValidatorMixin.__init__(self, iiif_validator=iiif_validator)
         SubValidationMixin.__init__(self)
-        self._path = _Path(tuple())
+        self._path = Path(tuple())
         self._json = None
         self.corrected_doc = None
 
@@ -153,16 +153,16 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         Useful when validating an embedded dictionary
         and adding its path to the current path.
 
-        :param path (_Path or tuple): The path to temporarily use.
+        :param path (Path or tuple): The path to temporarily use.
         """
         old_path = self._path
         try:
             if isinstance(path, tuple):
-                self._path = _Path(path)
-            elif isinstance(path, _Path):
+                self._path = Path(path)
+            elif isinstance(path, Path):
                 self._path = path
             else:
-                raise ValueError("path must be _Path or tuple.")
+                raise ValueError("path must be Path or tuple.")
             yield
         finally:
             self._path = old_path
@@ -205,7 +205,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
         # Reset the validator object constants.
         if not path:
-            path = _Path(tuple())
+            path = Path(tuple())
         self._reset(path)
 
         # Load the json_dict argument as json if a raw string was provided.
