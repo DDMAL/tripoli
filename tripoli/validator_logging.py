@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 import traceback
+from itertools import zip_longest
 
 
 class _Path:
@@ -79,7 +80,9 @@ class _Path:
         """
         if isinstance(path, _Path):
             path = path._no_index_path
-        for a, b in zip(reversed(self._no_index_path), reversed(path)):
+        for a, b in zip_longest(reversed(self._no_index_path), reversed(path)):
+            if b is None:
+                return True
             if a != b:
                 return False
         return True
@@ -123,6 +126,7 @@ class ValidatorLogEntry:
     def __eq__(self, other):
         return self.path._no_index_path == other.path._no_index_path\
                 and self.msg == other.msg
+
 
 class ValidatorLogWarning(ValidatorLogEntry):
     """Class to hold and present warnings."""
