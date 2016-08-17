@@ -13,6 +13,16 @@ with open('secret_key', 'rb') as f:
     app.secret_key = f.read()
 
 
+class NetworkError(Exception):
+    def __index__(self, err):
+        self.err = err
+
+
+class ParseError(Exception):
+    def __index__(self, err):
+        self.err = err
+
+
 def val_with_content_type(value, template):
     """Return either json or text/html with value dict."""
     mimes = request.accept_mimetypes
@@ -25,8 +35,14 @@ def val_with_content_type(value, template):
 
 
 def fetch_manifest(manifest_url):
-    resp = requests.get(manifest_url)
-    man = json.loads(resp.text)
+    try:
+        resp = requests.get(manifest_url)
+    except Exception as e:
+        raise NetworkError(e)
+    try:
+        man = json.loads(resp.text)
+    except Exception as e:
+        raise ParseError(e)
     return man
 
 
@@ -49,8 +65,12 @@ def validate_manifest(manifest_url):
     if manifest_url:
         try:
             man = fetch_manifest(manifest_url)
-        except Exception as e:
-            resp = jsonify({"message": "Could not retrieve manifest at '{}'".format(manifest_url)})
+        except NetworkError as e:
+            resp = jsonify({"message": "Could not retrieve json at '{}'".format(manifest_url)})
+            resp.status_code = 400
+            return resp
+        except ParseError as e:
+            resp = jsonify({"message": "Could not parse json at '{}'".format(manifest_url)})
             resp.status_code = 400
             return resp
 
