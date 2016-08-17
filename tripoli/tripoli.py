@@ -72,6 +72,10 @@ class IIIFValidator(SubValidationMixin):
         #: If ``True``, only one instance of duplicate logged messages will be saved.
         #: If ``False``, all logged messages will be saved.
         #: Default ``True``.
+
+        #: Example: If set to true, then if every canvas has error A, instead
+        #: of having the errors (Error(A, canvas[0]), Error(A, canvas[1]), ...), you
+        #: will only get Error(A, canvas[0]) (the first error of type A on a canvas).
         self.unique_logging = True
 
         self._setup_to_validate()
