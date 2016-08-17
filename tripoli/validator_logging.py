@@ -60,10 +60,14 @@ class Path:
         return hash(self._path)
 
     @property
-    def _no_index_path(self):
+    def no_index_path(self):
         if self.__no_index_path is None:
             self.__no_index_path = tuple(filter(lambda x: isinstance(x, str), self._path))
         return self.__no_index_path
+
+    @property
+    def path(self):
+        return self._path
 
     def no_index_eq(self, other):
         """Return true if paths are the same, ignoring indexes.
@@ -71,21 +75,55 @@ class Path:
         Useful for hashing, as we typically only care about storing
         one instance of each error/warning per list.
         """
-        return self._no_index_path == other._no_index_path
+        return self.no_index_path == other.no_index_path
 
     def no_index_endswith(self, path):
-        """Return true is self._no_index_path has ``path`` as a suffix.
+        """Return true is self.no_index_path has ``path`` as a suffix.
 
         :param path: Either a str-tuple or a Path.
         """
         if isinstance(path, Path):
-            path = path._no_index_path
-        for a, b in zip_longest(reversed(self._no_index_path), reversed(path)):
+            path = path.no_index_path
+        for a, b in zip_longest(reversed(self.no_index_path), reversed(path)):
             if b is None:
                 return True
             if a != b:
                 return False
         return True
+
+
+class ValidatorLog:
+    """Log which provides unified interface for either set or list like behaviour."""
+    def __init__(self, unique_logging=True):
+        self.unique_logging = unique_logging
+        self._entries = set() if unique_logging else []
+
+    def add(self, log_entry):
+        """Add an entry to the log.
+
+        :param log_entry: A ValidatorLogEntry to add to self.
+        """
+        if isinstance(log_entry, ValidatorLogEntry):
+            if self.unique_logging:
+                self._entries.add(log_entry)
+            else:
+                self._entries.append(log_entry)
+        else:
+            raise TypeError('log_entry must be a ValidatorLogEntry')
+
+    def update(self, log_entry):
+        """Add all entries from log_entry to self.
+
+        :param log_entry: A ValidatorLog to update from.
+        """
+        for entry in log_entry._entries:
+            self.add(entry)
+
+    def __iter__(self):
+        return iter(self._entries)
+
+    def __bool__(self):
+        return bool(self._entries)
 
 
 class ValidatorLogEntry:
@@ -121,10 +159,10 @@ class ValidatorLogEntry:
         return len(self.path) < len(other.path)
 
     def __hash__(self):
-        return hash(str(self.path._no_index_path) + self.msg)
+        return hash(str(self.path.no_index_path) + self.msg)
 
     def __eq__(self, other):
-        return self.path._no_index_path == other.path._no_index_path\
+        return self.path.no_index_path == other.path.no_index_path\
                 and self.msg == other.msg
 
 

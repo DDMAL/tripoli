@@ -23,7 +23,7 @@ import logging
 
 from .exceptions import FailFastException
 from .mixins import SubValidationMixin
-from .validator_logging import ValidatorLogError
+from .validator_logging import ValidatorLogError, ValidatorLog
 from .resource_validators import (
     ManifestValidator, SequenceValidator, CanvasValidator,
     ImageContentValidator, AnnotationValidator)
@@ -140,8 +140,8 @@ class IIIFValidator(SubValidationMixin):
             "sc:Canvas": self._CanvasValidator,
             "oa:Annotation": self._AnnotationValidator
         }
-        self._errors = set()
-        self._warnings = set()
+        self._errors = ValidatorLog(self.unique_logging)
+        self._warnings = ValidatorLog(self.unique_logging)
         self.corrected_doc = {}
 
     def _set_from_sub(self, sub):

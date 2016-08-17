@@ -1,3 +1,5 @@
+from .validator_logging import ValidatorLog
+
 class LinkedValidatorMixin:
     """Basic support for storing 'global' references in a single administrative class."""
 
@@ -26,6 +28,10 @@ class LinkedValidatorMixin:
         return self._IIIFValidator.verbose
 
     @property
+    def unique_logging(self):
+        return self._IIIFValidator.unique_logging
+
+    @property
     def ManifestValidator(self):
         return self._IIIFValidator._ManifestValidator
 
@@ -50,8 +56,8 @@ class SubValidationMixin:
     """Provides needed parts to accumulate errors and delegate validation."""
 
     def __init__(self):
-        self._errors = set()
-        self._warnings = set()
+        self._errors = ValidatorLog()
+        self._warnings = ValidatorLog()
         self.is_valid = None
 
     @property
@@ -91,9 +97,9 @@ class SubValidationMixin:
             subschema._validate(value, path, **kwargs)
         finally:
             if subschema._errors:
-                self._errors = self._errors | subschema._errors
+                self._errors.update(subschema._errors)
             if subschema._warnings:
-                self._warnings = self._warnings | subschema._warnings
+                self._warnings.update(subschema._warnings)
         if subschema.corrected_doc:
             return subschema.corrected_doc
         else:

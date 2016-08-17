@@ -30,7 +30,7 @@ import re
 import defusedxml.ElementTree as ET
 
 from ..mixins import LinkedValidatorMixin, SubValidationMixin
-from ..validator_logging import ValidatorLogError, ValidatorLogWarning, Path
+from ..validator_logging import ValidatorLogError, ValidatorLogWarning, Path, ValidatorLog
 from ..exceptions import FailFastException
 
 
@@ -193,8 +193,8 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         """Reset the validator to handle a new chunk of data."""
         self._json = None
         self.is_valid = None
-        self._errors = set()
-        self._warnings = set()
+        self._errors = ValidatorLog(self.unique_logging)
+        self._warnings = ValidatorLog(self.unique_logging)
         self._path = path
 
     def setup(self):
