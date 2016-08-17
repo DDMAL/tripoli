@@ -490,7 +490,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
         Logs a warning if any tag not in HTML_ALLOWED_TAGS is present.
         Logs an error if any tag in HTML_FORBIDDEN_TAGS is present.
-        Logs an error if any html tag is found in a field not in HTML_ALLOWEd_FIELDS.
+        Logs an error if any html tag is found in a field not in HTML_ALLOWED_FIELDS.
         """
         # Disregarding indices in paths, check if the suffix of the current path
         # is one which can validly contain html.
