@@ -166,8 +166,9 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         self.assert_errors_with_inputs(self.test_subject.viewing_dir_field, ["error"])
 
     def test_html_validation(self):
+        # Valid (path, field, html-value) tuples
         valid_inputs = {
-            (_Path(('metadata',)), 'labels', "<a href='http://google.ca'>Google</a>"),
+            (_Path(('metadata',)), 'label', "<a href='http://google.ca'>Google</a>"),
             (_Path(('sequences', 0, 'metadata')), 'value', "<span><p>Test</p></span>"),
             (_Path(tuple()), 'description', "<p><br/></p>"),
             (_Path(tuple()), 'attribution', "<img src='fake source'/>")
@@ -176,7 +177,21 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         for p, f, v in valid_inputs:
             self.test_subject._path = p
             self.test_subject._check_html(f, v)
-            self.assertFalse(self.has_warnings_or_errors(), self.test_subject.errors + self.test_subject.warnings)
+            self.assertFalse(self.has_warnings_or_errors(), (p,v,f))
+
+        # Invalid (path, field, html-value) tuples
+        invalid_inputs = {
+            (_Path(tuple()), 'label', "<a href='http://google.ca'>Bad field</a>"),
+            (_Path(tuple()), 'description', "<script>Nasty scripting</script>"),
+            (_Path(tuple()), 'description', "<a target='something'>Bad attribute</a>"),
+            (_Path(tuple()), 'description', "this is <a>badly formatted.</a>"),
+        }
+
+        for p, f, v in invalid_inputs:
+            self.test_subject._path = p
+            self.test_subject._check_html(f, v)
+            self.assertTrue(self.has_errors(), (p,f,v))
+            self.clear_errors_and_warnings()
 
     def test_mute_error(self):
         # Test error is caught.
