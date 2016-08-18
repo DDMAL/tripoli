@@ -107,6 +107,23 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             'value': functools.partial(self._str_or_val_lang_type, "value")
         }
 
+        self._common_fields_mapping = {
+            "@id": self.id_field,
+            "label": self.label_field,
+            "metadata": self.metadata_field,
+            "description": self.description_field,
+            "thumbnail": self.thumbnail_field,
+            "logo": self.logo_field,
+            "attribution": self.attribution_field,
+            "@type": self.type_field,
+            "license": self.license_field,
+            "related": self.related_field,
+            "rendering": self.rendering_field,
+            "service": self.service_field,
+            "seeAlso": self.seeAlso_field,
+            "within": self.within_field,
+        }
+
     @staticmethod
     def errors_to_warnings(fn):
         """Cast any errors to warnings on any ``*_field`` or ``*_type`` function.
@@ -301,22 +318,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     def _check_common_fields(self, val):
         """Validate fields that could appear on any resource."""
-        common_fields = {
-            "label": self.label_field,
-            "metadata": self.metadata_field,
-            "description": self.description_field,
-            "thumbnail": self.thumbnail_field,
-            "logo": self.logo_field,
-            "attribution": self.attribution_field,
-            "@type": self.type_field,
-            "license": self.license_field,
-            "related": self.related_field,
-            "rendering": self.rendering_field,
-            "service": self.service_field,
-            "seeAlso": self.seeAlso_field,
-            "within": self.within_field,
-        }
-        return self._compare_dicts(common_fields, val)
+        return self._compare_dicts(self._common_fields_mapping, val)
 
     def _check_recommended_fields(self, resource, r_dict, fields):
         """Log warnings if fields which should be in r_dict are not.
