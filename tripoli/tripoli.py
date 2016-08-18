@@ -58,6 +58,9 @@ class IIIFValidator(SubValidationMixin):
         #: When ``True``, validation stops at first error hit (faster).
         #: If ``False``, entire document will always be validated.
         #: Default ``True``.
+        #: Note: Turning ``fail_fast`` off may cause the validator to raise
+        #: unexpected exceptions if the the document is grossly invalid
+        #: (for instance, if an integer is supplied where a list is expected).
         self.fail_fast = True
 
         #: If corrections were made during validation, the corrected document
