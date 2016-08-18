@@ -165,16 +165,19 @@ class IIIFValidator(SubValidationMixin):
         for warn in self.warnings:
             self.logger.warning(warn.log_str())
 
-    def _get_validator(self, json_dict):
-        """Parse json_dict and return the correct validator.
-
-        Raises a TypeParseException if this cannot be done.
-        """
+    def _parse_json(self, json_dict):
         if isinstance(json_dict, str):
             try:
                 json_dict = json.loads(json_dict)
             except ValueError:
                 self._exit_early("Could not parse json.")
+        return json_dict
+
+    def _get_validator(self, json_dict):
+        """Parse json_dict and return the correct validator.
+
+        Raises a TypeParseException if this cannot be done.
+        """
 
         doc_type = json_dict.get("@type")
         if not doc_type:
@@ -198,6 +201,7 @@ class IIIFValidator(SubValidationMixin):
         """
         self._setup_to_validate()
         try:
+            json_dict = self._parse_json(json_dict)
             validator = self._get_validator(json_dict)
         except TypeParseException:
             self._output_logging()
