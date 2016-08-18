@@ -362,6 +362,10 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     def _check_all_key_constraints(self, resource, r_dict):
         """Call all key constraint checking methods."""
+        if not isinstance(r_dict, dict):
+            self.log_error(resource, "'{}' must be json-object, not {}".format(resource, type(r_dict).__name__))
+            return r_dict
+
         self._check_forbidden_fields(resource, r_dict, self.FORBIDDEN_FIELDS)
         self._check_required_fields(resource, r_dict, self.REQUIRED_FIELDS)
         self._check_recommended_fields(resource, r_dict, self.RECOMMENDED_FIELDS)
