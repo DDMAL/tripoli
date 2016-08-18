@@ -225,10 +225,6 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             path = Path(tuple())
         self._reset(path)
 
-        # Load the json_dict argument as json if a raw string was provided.
-        if isinstance(json_dict, str):
-            json_dict = json.loads(json_dict)
-
         self._json = json_dict
         try:
             val = self._run_validation(**kwargs)
