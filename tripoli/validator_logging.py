@@ -24,12 +24,12 @@ from itertools import zip_longest
 
 class Path:
     """Class representing path within document."""
-    def __init__(self, path):
+    def __init__(self, path=None):
         """ Create a Path.
 
         :param path: Tuple of strings and ints.
         """
-        self._path = path
+        self._path = path if path is not None else tuple()
         self.__no_index_path = None
 
     def __eq__(self, other):

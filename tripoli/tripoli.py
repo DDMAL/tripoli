@@ -21,9 +21,9 @@
 import json
 import logging
 
-from .exceptions import FailFastException
+from .exceptions import FailFastException, TypeParseException
 from .mixins import SubValidationMixin
-from .validator_logging import ValidatorLogError, ValidatorLog
+from .validator_logging import ValidatorLogError, ValidatorLog, Path
 from .resource_validators import (
     ManifestValidator, SequenceValidator, CanvasValidator,
     ImageContentValidator, AnnotationValidator)
@@ -165,24 +165,44 @@ class IIIFValidator(SubValidationMixin):
         for warn in self.warnings:
             self.logger.warning(warn.log_str())
 
+    def _get_validator(self, json_dict):
+        """Parse json_dict and return the correct validator.
+
+        Raises a TypeParseException if this cannot be done.
+        """
+        if isinstance(json_dict, str):
+            try:
+                json_dict = json.loads(json_dict)
+            except ValueError:
+                self._exit_early("Could not parse json.")
+
+        doc_type = json_dict.get("@type")
+        if not doc_type:
+            self._exit_early("Resource has no @type.")
+
+        validator = self._TYPE_MAP.get(doc_type)
+        if not validator:
+            self._exit_early("Unknown @type: '{}'".format(doc_type))
+        return validator
+
+    def _exit_early(self, msg):
+        """Log an error with message, set is_valid to false, and raise TypeParseException."""
+        self._errors.add(ValidatorLogError(msg, Path()))
+        self.is_valid = False
+        raise TypeParseException
+
     def validate(self, json_dict, **kwargs):
         """Determine the correct validator and validate a resource.
 
         :param json_dict: A dict or str of a json resource.
         """
         self._setup_to_validate()
-        if isinstance(json_dict, str):
-            try:
-                json_dict = json.loads(json_dict)
-            except ValueError:
-                self._errors.add(ValidatorLogError("Could not parse json.", tuple()))
-                self.is_valid = False
+        try:
+            validator = self._get_validator(json_dict)
+        except TypeParseException:
+            self._output_logging()
+            return
 
-        doc_type = json_dict.get("@type")
-        validator = self._TYPE_MAP.get(doc_type)
-        if not validator:
-            self._errors.add(ValidatorLogError("Unknown @type: '{}'".format(doc_type), tuple()))
-            self.is_valid = False
         try:
             self._sub_validate(validator, json_dict, path=None, **kwargs)
         except FailFastException:
