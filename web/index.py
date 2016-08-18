@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, session, abort
-from tripoli import IIIFValidator
+import tripoli
 import requests
 import ujson as json
 
@@ -57,7 +57,8 @@ def index():
 
 
 def index_get():
-    val = {"message": "GET with query parameter 'manifest' to validate."}
+    val = {"message": "GET with query parameter 'manifest' to validate.",
+           "version": tripoli.tripoli.__version__}
     return val_with_content_type(val, 'index.html')
 
 
@@ -74,7 +75,7 @@ def validate_manifest(manifest_url):
             resp.status_code = 400
             return resp
 
-        iv = IIIFValidator()
+        iv = tripoli.IIIFValidator()
         iv.fail_fast = False
         iv.logger.setLevel("CRITICAL")
         iv.validate(man)
@@ -82,7 +83,8 @@ def validate_manifest(manifest_url):
         resp = {"errors": [str(err) for err in sorted(iv.errors)],
                 "warnings": [str(warn) for warn in sorted(iv.warnings)],
                 "is_valid": iv.is_valid,
-                "manifest_url": manifest_url}
+                "manifest_url": manifest_url,
+                "version": tripoli.tripoli.__version__}
         return val_with_content_type(resp, 'index.html')
 
 if __name__ == "__main__":

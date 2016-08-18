@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <head>
     <title>{% block title %}Tripoli{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='pure.min.css') }}">
@@ -34,11 +34,11 @@
             <li style="color:orange">{{ warn }}</li>
         {% endfor %}
     </ul>
-
 </div>
 </body>
 <footer class="site-footer">
     <hr color="#ccc">
     <a href="https://github.com/DDMAL/tripoli">GitHub Project</a> -
-    <a href="http://tripoli.readthedocs.io/en/latest/">Documentation</a>
+    <a href="http://tripoli.readthedocs.io/en/latest/">Documentation</a> -
+    <a href="https://github.com/DDMAL/tripoli/releases/tag/{{version}}"> Tripoli {{ version }}</a>
 </footer>
