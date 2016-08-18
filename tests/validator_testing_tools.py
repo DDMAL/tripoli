@@ -1,6 +1,8 @@
 import unittest
 import inspect
 
+from tripoli.validator_logging import ValidatorLog
+
 
 class ValidatorTestingTools(unittest.TestCase):
 
@@ -25,14 +27,14 @@ class ValidatorTestingTools(unittest.TestCase):
         return (bool(self.test_subject._warnings) or bool(self.test_subject._errors))
 
     def clear_errors(self):
-        self.test_subject._errors = set()
+        self.test_subject._errors = ValidatorLog(self.test_subject.unique_logging)
 
     def clear_warnings(self):
-        self.test_subject._warnings = set()
+        self.test_subject._warnings = ValidatorLog(self.test_subject.unique_logging)
 
     def clear_errors_and_warnings(self):
-        self.test_subject._errors = set()
-        self.test_subject._warnings = set()
+        self.test_subject._errors = ValidatorLog(self.test_subject.unique_logging)
+        self.test_subject._warnings = ValidatorLog(self.test_subject.unique_logging)
 
     def assert_no_errors_with_inputs(self, fn, inputs):
         """Run validation fn on each input, asserting no error is logged."""
