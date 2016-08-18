@@ -18,11 +18,6 @@ class NetworkError(Exception):
         self.err = err
 
 
-class ParseError(Exception):
-    def __index__(self, err):
-        self.err = err
-
-
 def val_with_content_type(value, template):
     """Return either json or text/html with value dict."""
     mimes = request.accept_mimetypes
@@ -39,11 +34,7 @@ def fetch_manifest(manifest_url):
         resp = requests.get(manifest_url)
     except Exception as e:
         raise NetworkError(e)
-    try:
-        man = json.loads(resp.text)
-    except Exception as e:
-        raise ParseError(e)
-    return man
+    return resp
 
 
 @app.route('/', methods=['GET'])
@@ -65,12 +56,21 @@ def index_get():
 def validate_manifest(manifest_url):
     if manifest_url:
         try:
-            man = fetch_manifest(manifest_url)
+            req = fetch_manifest(manifest_url)
         except NetworkError as e:
-            resp = jsonify({"message": "Could not retrieve json at '{}'".format(manifest_url)})
+            resp = jsonify({"message": "Encountered network error while requesting '{}'".format(manifest_url)})
             resp.status_code = 400
             return resp
-        except ParseError as e:
+
+        if req.status_code < 200 or req.status_code >= 400:
+            resp = jsonify({"message": "Could not retrieve json at '{}'."
+                                       " Server responded with status code {}.".format(manifest_url, req.status_code)})
+            resp.status_code = 400
+            return resp
+
+        try:
+            man = json.loads(req.content)
+        except Exception as e:
             resp = jsonify({"message": "Could not parse json at '{}'".format(manifest_url)})
             resp.status_code = 400
             return resp
