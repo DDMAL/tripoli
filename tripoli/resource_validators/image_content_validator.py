@@ -49,7 +49,7 @@ class ImageContentValidator(BaseValidator):
     def type_field(self, value):
         """Warn if ``@type != 'dctypes:Image'``"""
         if value != 'dctypes:Image':
-            self.log_warning('@type', "@type SHOULD be \'dctypes:Image\'")
+            self.log_error('@type', "@type MUST be \'dctypes:Image\'")
         return value
 
     def service_field(self, value):
