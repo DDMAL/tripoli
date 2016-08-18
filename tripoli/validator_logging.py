@@ -33,7 +33,7 @@ class Path:
         self.__no_index_path = None
 
     def __eq__(self, other):
-        return self._path == other._path
+        return self.__no_index_path == other.__no_index_path
 
     def __len__(self):
         return len(self._path)
@@ -84,12 +84,7 @@ class Path:
         """
         if isinstance(path, Path):
             path = path.no_index_path
-        for a, b in zip_longest(reversed(self.no_index_path), reversed(path)):
-            if b is None:
-                return True
-            if a != b:
-                return False
-        return True
+        return path == self.no_index_path[-(len(path)):]
 
 
 class ValidatorLog:
@@ -159,7 +154,7 @@ class ValidatorLogEntry:
         return len(self.path) < len(other.path)
 
     def __hash__(self):
-        return hash(str(self.path.no_index_path) + self.msg)
+        return hash(self.path.no_index_path) ^ hash(self.msg)
 
     def __eq__(self, other):
         return self.path.no_index_path == other.path.no_index_path\
