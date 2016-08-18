@@ -47,8 +47,8 @@ class CanvasValidator(BaseValidator):
         self.setup()
 
     def _run_validation(self, **kwargs):
-        self.canvas_uri = self._json['@id']
         self._check_all_key_constraints("canvas", self._json)
+        self.canvas_uri = self._json['@id']
         return self._compare_dicts(self.CanvasSchema, self._json)
 
     def _raise_additional_warnings(self, validation_results):
