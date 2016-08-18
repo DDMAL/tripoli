@@ -28,7 +28,7 @@ class AnnotationValidator(BaseValidator):
     FORBIDDEN_FIELDS = {"format", "height", "width", "viewingDirection", "navDate", "startCanvas", "first",
                         "last", "total", "next", "prev", "startIndex", "collections", "manifests", "members",
                         "sequences", "structures", "canvases", "resources", "otherContent", "images", "ranges"}
-    REQUIRED_FIELDS = {"@type", "on", "motivation"}
+    REQUIRED_FIELDS = {"@type", "on", "motivation", "resource"}
 
     def __init__(self, iiif_validator):
         super().__init__(iiif_validator)
