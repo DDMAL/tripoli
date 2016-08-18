@@ -77,6 +77,10 @@ class ManifestValidator(BaseValidator):
             self.log_error("sequences", "'sequences' MUST be a list")
             return value
 
+        if len(value) == 0:
+            self.log_error("sequences", "Manifest requires at least one sequence")
+            return value
+
         results = []
         path = self._path + ("sequences",)
         for i, seq in enumerate(value):
