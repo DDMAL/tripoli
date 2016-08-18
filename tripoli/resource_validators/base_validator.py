@@ -304,7 +304,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         common_fields = {
             "label": self.label_field,
             "metadata": self.metadata_field,
-            "description:": self.description_field,
+            "description": self.description_field,
             "thumbnail": self.thumbnail_field,
             "logo": self.logo_field,
             "attribution": self.attribution_field,
