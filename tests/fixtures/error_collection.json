@@ -1,0 +1,320 @@
+{
+  "label": "Collection of Errors",
+  "@type": "sc:Collection",
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "http://iiif.io/api/presentation/2.0/example/errors/collection.json",
+  "manifests": [
+    {
+      "label": "0: Non-JSON",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/0/manifest.json",
+      "manifest": "asdf"
+    },
+    {
+      "label": "1: Empty JSON",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/1/manifest.json",
+      "manifest": "{}"
+    },
+    {
+      "label": "2: JSON without @context",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/2/manifest.json",
+      "manifest": "{\"@id\":\"foo\"}"
+    },
+    {
+      "label": "3: JSON with empty @context",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/3/manifest.json",
+      "manifest": "{\"@context\":\"\"}"
+    },
+    {
+      "label": "4: JSON with unknown @context",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/4/manifest.json",
+      "manifest": "{\"@context\":\"http://example.com/context.json\"}"
+    },
+    {
+      "label": "5: JSON without a @type",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/5/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\"\n}"
+    },
+    {
+      "label": "6: JSON with a nonsense @type",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/6/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@type\": \"fish\"\n}"
+    },
+    {
+      "label": "7: Manifest without an @id",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/7/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "8: Manifest with a nonsense @id",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/8/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"fish\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "9: Manifest without a label",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/9/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "10: Manifest with a non-string label",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/10/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": 1.0, \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "11: Manifest without any Sequences (not present)",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/11/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\"\n}"
+    },
+    {
+      "label": "12: Manifest without any Sequences (empty)",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/12/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": []\n}"
+    },
+    {
+      "label": "13: Manifest with broken Sequence",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/13/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    1\n  ]\n}"
+    },
+    {
+      "label": "14: Manifest with non Sequence",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/14/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": {\n    \"1\": 2\n  }\n}"
+    },
+    {
+      "label": "15: Manifest with non Sequence in list",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/15/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"fish\"\n    }\n  ]\n}"
+    },
+    {
+      "label": "16: Manifest with Sequence not in list",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/16/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": {\n    \"@type\": \"sc:Sequence\"\n  }\n}"
+    },
+    {
+      "label": "17: Manifest with empty Sequence",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/17/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\"\n    }\n  ]\n}"
+    },
+    {
+      "label": "18: Manifest with empty Sequence",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/18/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": []\n    }\n  ]\n}"
+    },
+    {
+      "label": "19: Sequence with non Canvas / non list",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/19/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": \"asdf\"\n    }\n  ]\n}"
+    },
+    {
+      "label": "20: Sequence with non Canvas in a list",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/20/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        \"asdf\"\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "21: Sequence with Canvas not in a list",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/21/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": {\n        \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n        \"@type\": \"sc:Canvas\", \n        \"height\": 1, \n        \"label\": \"canvas\", \n        \"width\": 1\n      }\n    }\n  ]\n}"
+    },
+    {
+      "label": "22: Canvas without id",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/22/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "23: Canvas without real URI",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/23/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"asdf\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "24: Canvas without label",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/24/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "25: Canvas with nonstring label",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/25/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": 1.0, \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "26: Canvas without height",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/26/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "27: Canvas with non integer height",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/27/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": \"two\", \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "28: Canvas without width",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/28/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\"\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "29: Canvas with non integer width",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/29/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": \"two\"\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "30: Canvas with non list images",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/30/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": \"asdfasdf\", \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "31: Canvas with list of non annotations in images",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/31/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            \"asdfasdf\"\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "32: Canvas with annotation directly in images",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/32/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": {\n            \"@type\": \"oa:Annotation\", \n            \"motivation\": \"sc:painting\", \n            \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n            \"resource\": {\n              \"@id\": \"http://example.net/image.jpg\", \n              \"@type\": \"dctypes:Image\"\n            }\n          }, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "33: Annotation without a motivation",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/33/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": {\n                \"@id\": \"http://example.net/image.jpg\", \n                \"@type\": \"dctypes:Image\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "34: Annotation with a nonsense motivation",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/34/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"somethingElse\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": {\n                \"@id\": \"http://example.net/image.jpg\", \n                \"@type\": \"dctypes:Image\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "35: Annotation without a target/on",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/35/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"resource\": {\n                \"@id\": \"http://example.net/image.jpg\", \n                \"@type\": \"dctypes:Image\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "36: Annotation with a nonsense target/on",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/36/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": 1.0, \n              \"resource\": {\n                \"@id\": \"http://example.net/image.jpg\", \n                \"@type\": \"dctypes:Image\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "37: Annotation without a body/resource",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/37/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\"\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "38: Annotation with a nonsense body/resource",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/38/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": 1.0\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "39: Annotation resource without a type",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/39/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": {\n                \"@id\": \"http://example.net/image.jpg\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "40: Annotation resource in images that isn't an Image",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/40/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": {\n                \"@id\": \"http://foo.bar.com/baz\", \n                \"@type\": \"dctypes:Audio\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "41: Image without an id",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/41/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": {\n                \"@type\": \"dctypes:Image\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "42: Image without a real id",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/42/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": {\n                \"@id\": \"asdf\", \n                \"@type\": \"dctypes:Image\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "43: Image with broken height",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/43/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": {\n                \"@id\": \"http://example.net/image.jpg\", \n                \"@type\": \"dctypes:Image\", \n                \"height\": \"six\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "44: Image with broken width",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/44/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": [\n            {\n              \"@type\": \"oa:Annotation\", \n              \"motivation\": \"sc:painting\", \n              \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n              \"resource\": {\n                \"@id\": \"http://example.net/image.jpg\", \n                \"@type\": \"dctypes:Image\", \n                \"width\": \"six\"\n              }\n            }\n          ], \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "45: Non HTML with < and > in description",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/45/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"description\": {\n    \"@value\": \"<x> <y> <plain text>\"\n  }, \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "46: No Value in description",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/46/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"description\": {\n    \"@language\": \"en\"\n  }, \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "47: Vulnerable HTML attribute in description",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/47/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"description\": \"<span onmouseover='ownzor()'>Naughty</span>\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "48: Vulnerable HTML tag in description",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/48/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"description\": \"<span><script>function ownzor() {}</script>Naughty</span>\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "49: Vulnerable HTML comment in description",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/49/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"description\": \"<span><!-- &lt;script>function ownzor() {}&lt;/script>-->Naughty</span>\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}"
+    },
+    {
+      "label": "50: Invalid viewingDirection value",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/50/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ], \n  \"viewingDirection\": \"upside-down\"\n}"
+    },
+    {
+      "label": "51: Invalid startCanvas value",
+      "@type": "sc:Manifest",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/51/manifest.json",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ], \n      \"startCanvas\": \"http://example.net/not/a/canvas\"\n    }\n  ]\n}"
+    }
+  ]
+}
