@@ -124,6 +124,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             "service": self.service_field,
             "seeAlso": self.seeAlso_field,
             "within": self.within_field,
+            'viewingHint': self.viewing_hint_field
         }
 
     @staticmethod

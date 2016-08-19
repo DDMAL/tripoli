@@ -43,7 +43,6 @@ class SequenceValidator(BaseValidator):
             ('@id', self.id_field),
             ('startCanvas', self.startCanvas_field),
             ('viewingDirection', self.viewing_dir_field),
-            ('viewingHint', self.viewing_hint_field),
             ('canvases', self.canvases_field),
         ))
 

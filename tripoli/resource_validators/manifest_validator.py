@@ -41,6 +41,7 @@ class ManifestValidator(BaseValidator):
             ('@context', self.context_field),
             ('structures', self.structures_field),
             ('sequences', self.sequences_field),
+            ('viewingDirection', self.viewing_dir_field),
         ))
         self.setup()
 

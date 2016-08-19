@@ -40,7 +40,6 @@ class CanvasValidator(BaseValidator):
             ('label', self.label_field),
             ('height', self.height_field),
             ('width', self.width_field),
-            ('viewingHint', self.viewing_hint_field),
             ('other_content', self.other_content_field),
             ('images', self.images_field)
         ))
