@@ -84,7 +84,12 @@ class SequenceValidator(BaseValidator):
 
     def startCanvas_field(self, value):
         """Validate ``startCanvas`` field."""
-        return self._uri_type("startCanvas", value)
+        canvases = self._json.get('canvases', [])
+        if any(True for can in canvases if can.get('@id') == value):
+            pass
+        else:
+            self.log_error("startCanvas", "'startCanvas' must refer to the @id of some canvas in this sequence.")
+        return value
 
     def canvases_field(self, value):
         """Validate ``canvases`` list for Sequence."""
