@@ -24,7 +24,7 @@ from .base_validator import BaseValidator
 
 
 class AnnotationValidator(BaseValidator):
-    KNOWN_FIELDS = BaseValidator.COMMON_FIELDS | {"motivation", "resource", "on"}
+    KNOWN_FIELDS = BaseValidator.COMMON_FIELDS | {"motivation", "resource", "on", "@context"}
     FORBIDDEN_FIELDS = {"format", "height", "width", "viewingDirection", "navDate", "startCanvas", "first",
                         "last", "total", "next", "prev", "startIndex", "collections", "manifests", "members",
                         "sequences", "structures", "canvases", "resources", "otherContent", "images", "ranges"}
