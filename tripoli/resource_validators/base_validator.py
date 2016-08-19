@@ -507,11 +507,18 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         # Bool marking if this field contains any tags.
         field_contains_tags = bool(self._XML_TAG_REGEX.search(value))
 
+        # Bail if tags detected but first char is not '<'
+        if field_contains_tags and value[0] != "<":
+            self.log_error(field, "If field contains HTML, it must start with character '<'.")
+            return
+
+        # Error and exit if XML comments are detected.
         field_contains_comments = bool(self._XML_COMMENT_REGEX.search(value))
         if field_contains_comments:
             self.log_error(field, "XML comments not allowed.")
             return
 
+        # Error and exit if CDATA sections are detected.
         field_contains_cdata = bool(self._XML_CDATA_REGEX.search(value))
         if field_contains_cdata:
             self.log_error(field, "CDATA sections not allowed.")
