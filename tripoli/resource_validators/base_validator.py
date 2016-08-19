@@ -88,7 +88,9 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     HTML_FORBIDDEN_TAGS = {'script', 'style', 'object', 'form', 'input'}
 
     # Catch all regex for XML in string.
-    XML_REGEX = re.compile(r'<([^\s>]*)([^>]*/>|.*</\1>)', re.DOTALL)
+    _XML_TAG_REGEX = re.compile(r'<\/?(\w+)((\s+\w+(\s*=\s*(?:\".*?\"|\'.*?\'|[\^\'\">\s]+))?)+\s*|\s*)\/?>', re.DOTALL)
+    _XML_COMMENT_REGEX = re.compile(r'<!--.*?-->', re.DOTALL)
+    _XML_CDATA_REGEX = re.compile(r'<!\[CDATA\[.*?\]\]>')
 
     def __init__(self, iiif_validator=None):
         LinkedValidatorMixin.__init__(self, iiif_validator=iiif_validator)
@@ -503,7 +505,17 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         field_is_valid_xml = False
 
         # Bool marking if this field contains any tags.
-        field_contains_tags = bool(self.XML_REGEX.search(value))
+        field_contains_tags = bool(self._XML_TAG_REGEX.search(value))
+
+        field_contains_comments = bool(self._XML_COMMENT_REGEX.search(value))
+        if field_contains_comments:
+            self.log_error(field, "XML comments not allowed.")
+            return
+
+        field_contains_cdata = bool(self._XML_CDATA_REGEX.search(value))
+        if field_contains_cdata:
+            self.log_error(field, "CDATA sections not allowed.")
+            return
 
         # Try to parse the field and record if the field is valid xml.
         if field_contains_tags:
