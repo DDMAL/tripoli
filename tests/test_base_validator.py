@@ -82,10 +82,11 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
     def test_str_or_val_lang_type(self):
         """Allows stings, lists of strings, val/lang dicts, and lists of val/lang dicts"""
         valid_inputs = ['hello', ['hello', 'there'], {'@language': 'en', '@value': 'hello'},
-                        [{'@language': 'en', '@value': 'hello'}, {'@language': 'fr', '@value': 'bonjour'}]]
+                        [{'@language': 'en', '@value': 'hello'}, {'@language': 'fr', '@value': 'bonjour'}],
+                        {'@value': 'Hello'}]
         self.assert_no_errors_with_inputs(self.test_subject._str_or_val_lang_type, valid_inputs)
 
-        invalid_inputs = [0, {'@value': 14, '@language': 'en'}, {'@value': 'Hello'}]
+        invalid_inputs = [0, {'@value': 14, '@language': 'en'}, ]
         self.assert_errors_with_inputs(self.test_subject._str_or_val_lang_type, invalid_inputs)
 
     def test_repeatable_str_type(self):

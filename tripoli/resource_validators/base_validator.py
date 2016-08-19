@@ -20,7 +20,6 @@
 
 import contextlib
 import functools
-import json
 import traceback
 import urllib.parse
 import copy
@@ -406,9 +405,6 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         if isinstance(value, dict):
             if "@value" not in value:
                 self.log_error(field, "Field has no '@value' key where one is required.")
-                return value
-            if "@language" not in value:
-                self.log_error(field, "Field has no '@language' key where one is required.")
                 return value
             return self._compare_dicts(self._LangValPairs, value)
         self.log_error(field, "Illegal type (should be str, list, or dict)")

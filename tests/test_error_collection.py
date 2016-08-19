@@ -18,8 +18,6 @@ class TestErrorCollection(ValidatorTestingTools):
             collection = json.load(f)
 
         for m in collection['manifests']:
-            man = m['manifest']
             self.test_subject.validate(m['manifest'])
-
             self.assertTrue(self.has_errors(), "Did not catch error on '{}'".format(m['label']))
             self.clear_errors_and_warnings()
