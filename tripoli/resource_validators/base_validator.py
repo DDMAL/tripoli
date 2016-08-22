@@ -562,7 +562,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
             # Log warning if tag is not explicitly mentioned as being safe.
             if tag not in self.HTML_ALLOWED_TAGS:
                 self.log_warning(field, "HTML tag '<{}>' of uncertain validity "
-                                        "(valid tags are <a>, <b>, <br>, <i>, <img>, <p>, and <span>)")
+                                        "(valid tags are <a>, <b>, <br>, <i>, <img>, <p>, and <span>)".format(tag))
 
             for child_elem in elem:
                 child_valid = check_html_element(child_elem)
