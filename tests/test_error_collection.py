@@ -20,4 +20,5 @@ class TestErrorCollection(ValidatorTestingTools):
         for m in collection['manifests']:
             self.test_subject.validate(m['manifest'])
             self.assertTrue(self.has_errors(), "Did not catch error on '{}'".format(m['label']))
+            self.assertEqual(str(self.test_subject.errors[0]), m['error'])
             self.clear_errors_and_warnings()
