@@ -45,7 +45,7 @@ The ``IIIFValidator`` has a number of options to control its behaviour.
 .. module:: tripoli
 .. autoclass:: IIIFValidator
     :noindex:
-    :members: collect_errors, collect_warnings, debug, fail_fast
+    :members: collect_errors, collect_warnings, debug, fail_fast, verbose, unique_logging
 
 The complete interface can be found in the :doc:`API guide </api>`.
 

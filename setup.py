@@ -18,8 +18,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import os
+import sys
 from setuptools import setup, find_packages
+from codecs import open
+
 from tripoli.tripoli import __version__
+
+if sys.argv[-1] == 'publish':
+    os.system('python setup.py sdist bdist_wheel upload')
+    sys.exit()
+
+with open('README.rst', 'r', 'utf-8') as f:
+    read_me = f.read()
+
+with open('HISTORY.rst', 'r', 'utf-8') as f:
+    history = f.read()
 
 setup(
     name='tripoli',
@@ -27,6 +41,7 @@ setup(
     version=__version__,
     license='https://opensource.org/licenses/MIT',
     description='IIIF document validation.',
+    long_description=read_me + "\n\n" + history,
     author='Alex Parmentier',
     author_email='a.g.parmentier@gmail.com',
     url='https://github.com/DDMAL/tripoli',

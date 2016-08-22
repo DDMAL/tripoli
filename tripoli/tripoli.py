@@ -58,6 +58,7 @@ class IIIFValidator(SubValidationMixin):
         #: When ``True``, validation stops at first error hit (faster).
         #: If ``False``, entire document will always be validated.
         #: Default ``True``.
+        #:
         #: Note: Turning ``fail_fast`` off may cause the validator to raise
         #: unexpected exceptions if the the document is grossly invalid
         #: (for instance, if an integer is supplied where a list is expected).
@@ -75,7 +76,7 @@ class IIIFValidator(SubValidationMixin):
         #: If ``True``, only one instance of duplicate logged messages will be saved.
         #: If ``False``, all logged messages will be saved.
         #: Default ``True``.
-
+        #:
         #: Example: If set to true, then if every canvas has error A, instead
         #: of having the errors (Error(A, canvas[0]), Error(A, canvas[1]), ...), you
         #: will only get Error(A, canvas[0]) (the first error of type A on a canvas).
