@@ -46,22 +46,22 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
     # based on key constraints. Each inheritor should define these.
 
     #: The fields which may appear on this resource.
-    KNOWN_FIELDS = {}
+    KNOWN_FIELDS = set()
 
     #: The fields which are forbidden on this resource.
-    FORBIDDEN_FIELDS = {}
+    FORBIDDEN_FIELDS = set()
 
     #: The fields which are required on this resource.
-    REQUIRED_FIELDS = {}
+    REQUIRED_FIELDS = set()
 
     #: The fields which are recommended on this resource.
-    RECOMMENDED_FIELDS = {}
+    RECOMMENDED_FIELDS = set()
 
     # The set of acceptable viewHints on this resource.
-    VIEW_HINTS = {}
+    VIEW_HINTS = set()
 
     # The set of acceptable viewDirections on this resource.
-    VIEW_DIRS = {}
+    VIEW_DIRS = set()
 
     # The set of fields which may appear on _any_ resource.
     COMMON_FIELDS = {

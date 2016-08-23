@@ -3,6 +3,14 @@
 Release History
 ---------------
 
+1.1.4 (2016-08-23)
+++++++++++++++++++
+
+**Bugfixes**
+
+- Fixed an issue with the default values of REQUIRED_FIELDS (and other field sets)
+  being empty dicts instead of empty sets.
+
 1.1.3 (2016-08-23)
 ++++++++++++++++++
 
