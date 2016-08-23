@@ -3,6 +3,13 @@
 Release History
 ---------------
 
+1.1.3 (2016-08-23)
+++++++++++++++++++
+
+**Bugfixes**
+- A warning message regarding uncertain HTML tags has been fixed to include the name
+  of the tag.
+
 1.1.2 (2016-08-22)
 ++++++++++++++++++
 
