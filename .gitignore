@@ -9,3 +9,4 @@ tripoli.egg-info
 interactive.py
 .coverage
 htmlcov
+build/
