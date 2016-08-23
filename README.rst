@@ -1,16 +1,19 @@
+Tripoli: IIIF Document Validation
+=================================
+
 Tripoli is a validator for documents conforming to the `IIIF
 presentation API 2.1 <http://iiif.io/api/presentation/2.1/>`__. It makes
 it easy to validate documents, apply provider specific heuristics, and
 even correct documents while they are being validated.
 
 Documentation
-~~~~~~~~~~~~~
+-------------
 
 Detailed documentation is available at
 http://tripoli.readthedocs.io/en/latest/
 
 Installation
-~~~~~~~~~~~~
+------------
 
 You can install Tripoli using pip.
 
@@ -19,7 +22,7 @@ You can install Tripoli using pip.
     > pip install tripoli
 
 Quick start
-~~~~~~~~~~~
+-----------
 
 Once installed, it's easy to start validating. Tripoli can validate the
 entire document, and will log informative errors and warnings with

@@ -7,6 +7,7 @@ Release History
 ++++++++++++++++++
 
 **Bugfixes**
+
 - A warning message regarding uncertain HTML tags has been fixed to include the name
   of the tag.
 
