@@ -32,7 +32,38 @@ __version__ = "1.1.4"
 
 
 class IIIFValidator(SubValidationMixin):
-    def __init__(self):
+    #: Sets whether or not to save tracebacks in warnings/errors.
+    debug = False
+
+    #: Sets whether or not warnings are logged.
+    #: Default ``True``.
+    collect_warnings = True
+
+    #: Sets whether or not errors are logged.
+    collect_errors = True
+
+    #: When ``True``, validation stops at first error hit (faster).
+    #: If ``False``, entire document will always be validated.
+    #:
+    #: Note: Turning ``fail_fast`` off may cause the validator to raise
+    #: unexpected exceptions if the the document is grossly invalid
+    #: (for instance, if an integer is supplied where a list is expected).
+    fail_fast = True
+
+    #: If ``True``, prints all errors and warnings as they occur.
+    #: If ``False``, errors and warnings only printed after de-duplication.
+    verbose = False
+
+    #: If ``True``, only one instance of duplicate logged messages will be saved.
+    #: If ``False``, all logged messages will be saved.
+    #:
+    #: Example: If set to true, then if every canvas has error A, instead
+    #: of having the errors (Error(A, canvas[0]), Error(A, canvas[1]), ...), you
+    #: will only get Error(A, canvas[0]) (the first error of type A on a canvas).
+    unique_logging = True
+
+    def __init__(self, debug=False, collect_warnings=True, collect_errors=True, fail_fast=True,
+                 verbose=False, unique_logging=True):
         super().__init__()
         self._ManifestValidator = None
         self._AnnotationValidator = None
@@ -40,47 +71,19 @@ class IIIFValidator(SubValidationMixin):
         self._SequenceValidator = None
         self._ImageContentValidator = None
 
+        self.debug = debug
+        self.collect_warnings = collect_warnings
+        self.collect_errors = collect_errors
+        self.fail_fast = fail_fast
+        self.verbose = verbose
+        self.unique_logging = unique_logging
+
         #: ``logging.getLogger()`` used to print output.
         self.logger = logging.getLogger("tripoli")
 
-        #: Sets whether or not to save tracebacks in warnings/errors.
-        #: Default ``False``.
-        self.debug = False
-
-        #: Sets whether or not warnings are logged.
-        #: Default ``True``.
-        self.collect_warnings = True
-
-        #: Sets whether or not errors are logged.
-        #: Default ``True``.
-        self.collect_errors = True
-
-        #: When ``True``, validation stops at first error hit (faster).
-        #: If ``False``, entire document will always be validated.
-        #: Default ``True``.
-        #:
-        #: Note: Turning ``fail_fast`` off may cause the validator to raise
-        #: unexpected exceptions if the the document is grossly invalid
-        #: (for instance, if an integer is supplied where a list is expected).
-        self.fail_fast = True
-
         #: If corrections were made during validation, the corrected document
         #: will be placed here.
-        self.corrected_doc = {}
-
-        #: If ``True``, prints all errors and warnings as they occur.
-        #: If ``False``, errors and warnings only printed after de-duplication.
-        #: Default ``False``.
-        self.verbose = False
-
-        #: If ``True``, only one instance of duplicate logged messages will be saved.
-        #: If ``False``, all logged messages will be saved.
-        #: Default ``True``.
-        #:
-        #: Example: If set to true, then if every canvas has error A, instead
-        #: of having the errors (Error(A, canvas[0]), Error(A, canvas[1]), ...), you
-        #: will only get Error(A, canvas[0]) (the first error of type A on a canvas).
-        self.unique_logging = True
+        corrected_doc = {}
 
         self._setup_to_validate()
 
