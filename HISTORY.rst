@@ -3,6 +3,20 @@
 Release History
 ---------------
 
+
+1.2.0 (2017-05-04)
+++++++++++++++++++
+
+**Improvements**
+
+- Configuration arguments for the basic IIIFValidator can now be passed in via kwargs
+  on the `__init__` function. A validator can now be instantiated with all its settings
+  in one line.
+
+**Bugfixes**
+
+- Web interface now specifically mentions that tripoli is for validating IIIF Manifests.
+
 1.1.4 (2016-08-23)
 ++++++++++++++++++
 
