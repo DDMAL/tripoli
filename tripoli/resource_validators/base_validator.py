@@ -438,7 +438,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
                                   .format(value))
             return value
         if not '@context' in value:
-            self.log_error(field, "{} must be valid JSON-LD, but has no "
+            self.log_error(field, "{} MUST be valid JSON-LD, but has no "
                                   "'@context' key where one is required."
                                   .format(field))
             return value
