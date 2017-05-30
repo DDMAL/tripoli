@@ -424,6 +424,32 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
         self.log_error(field, "Got '{}' when expecting string or repeated string.".format(value))
         return value
 
+    def _repeatable_service_type(self, field, value):
+        """ Allow for repeated service types, either referenced or embedded.
+        """
+        if isinstance(value, list):
+            return [self._service_type(field, val) for val in value]
+        else:
+            return self._service_type(field, value)
+
+    def _service_type(self, field, value):
+        if not isinstance(value, dict):
+            self.log_error(field, "Illegal type (MUST be an object): '{}'"
+                                  .format(value))
+            return value
+        if not '@context' in value:
+            self.log_error(field, "{} MUST be valid JSON-LD, but has no "
+                                  "'@context' key where one is required."
+                                  .format(field))
+            return value
+        if not '@id' in value:
+            self.log_warning(field, "{} SHOULD have an '@id' key.".format(field))
+        if not 'profile' in value:
+            self.log_warning(field, "{} SHOULD have a 'profile' key to "
+                                    "allow for determining the type of service."
+                                    .format(field))
+        return value
+
     def _repeatable_uri_type(self, field, value):
         """Allow single or repeating URIs.
 
@@ -615,7 +641,7 @@ class BaseValidator(LinkedValidatorMixin, SubValidationMixin):
 
     def service_field(self, value):
         """Validate the ``service`` field of the resource."""
-        return self._repeatable_uri_type("service", value)
+        return self._repeatable_service_type("service", value)
 
     def seeAlso_field(self, value):
         """Validate the ``seeAlso`` field of the resource."""

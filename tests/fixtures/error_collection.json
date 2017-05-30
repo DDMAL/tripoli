@@ -364,6 +364,20 @@
       "error": "Error: 'startCanvas' must refer to the @id of some canvas in this sequence. @ data['sequences'][0]['startCanvas']",
       "@id": "http://iiif.io/api/presentation/2.0/example/errors/51/manifest.json",
       "@type": "sc:Manifest"
+    },
+    {
+      "label": "52: Invalid service with URI instead of JSON-LD object",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1,\n      \"service\": \"http://example.net/not/jsonld\"\n        }\n      ]\n    }\n  ]\n}",
+      "error": "Error: Illegal type (MUST be an object): 'http://example.net/not/jsonld' @ data['sequences'][0]['canvases'][0]['service']",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/52/manifest.json",
+      "@type": "sc:Manifest"
+    },
+    {
+      "label": "53: Invalid service with missing '@context' key",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1,\n      \"service\": {\"@id\": \"http://example.net/some/service\"}\n        }\n      ]\n    }\n  ]\n}",
+      "error": "Error: service MUST be valid JSON-LD, but has no '@context' key where one is required. @ data['sequences'][0]['canvases'][0]['service']",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/53/manifest.json",
+      "@type": "sc:Manifest"
     }
   ],
   "@context": "http://iiif.io/api/presentation/2/context.json",
