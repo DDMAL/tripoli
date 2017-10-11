@@ -1,7 +1,8 @@
 Tripoli: IIIF Document Validation
 =================================
 
-[![Build Status](https://travis-ci.org/DDMAL/tripoli.svg?branch=master)](https://travis-ci.org/DDMAL/tripoli)
+.. image:: https://travis-ci.org/DDMAL/tripoli.svg?branch=master
+    :target: https://travis-ci.org/DDMAL/tripoli
 
 Tripoli is a validator for documents conforming to the `IIIF
 presentation API 2.1 <http://iiif.io/api/presentation/2.1/>`__. It makes
