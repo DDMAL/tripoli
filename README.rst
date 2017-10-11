@@ -4,6 +4,9 @@ Tripoli: IIIF Document Validation
 .. image:: https://travis-ci.org/DDMAL/tripoli.svg?branch=master
     :target: https://travis-ci.org/DDMAL/tripoli
 
+.. image:: https://coveralls.io/repos/github/DDMAL/tripoli/badge.svg?branch=master
+    :target: https://coveralls.io/github/DDMAL/tripoli?branch=master
+
 Tripoli is a validator for documents conforming to the `IIIF
 presentation API 2.1 <http://iiif.io/api/presentation/2.1/>`__. It makes
 it easy to validate documents, apply provider specific heuristics, and
