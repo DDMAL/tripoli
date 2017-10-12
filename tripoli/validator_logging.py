@@ -54,7 +54,7 @@ class Path:
             return Path(self._path + other)
         if isinstance(other, Path):
             return Path(self._path + other._path)
-        raise NotImplemented
+        return NotImplemented
 
     def __hash__(self):
         return hash(self._path)
