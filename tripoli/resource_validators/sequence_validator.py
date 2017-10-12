@@ -49,13 +49,16 @@ class SequenceValidator(BaseValidator):
         self.LinkedSequenceSchema = OrderedDict((
             ('@type', self.type_field),
             ('@id', self.id_field),
-            ('canvases', self._not_allowed)
+            ('canvases', self._canvas_not_allowed)
         ))
         self.setup()
 
     def _run_validation(self, **kwargs):
         self._check_all_key_constraints("sequence", self._json)
         return self._validate_sequence(**kwargs)
+
+    def _canvas_not_allowed(self, value):
+        return self._not_allowed('canvas', value)
 
     def _validate_sequence(self, emb=True):
         self.emb = emb
