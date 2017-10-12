@@ -58,7 +58,7 @@ class CanvasValidator(BaseValidator):
     def type_field(self, value):
         """Assert that ``@type == 'sc:Canvas``"""
         if value != "sc:Canvas":
-            self.log_error("@type", "@type must be 'sc:Canvas'.")
+            self.log_error("@type", "@type MUST be 'sc:Canvas'.")
         return value
 
     def images_field(self, value):
@@ -66,19 +66,17 @@ class CanvasValidator(BaseValidator):
 
         Calls a sub-validation procedure handled by the :class:`AnnotationValidator`.
         """
-        if isinstance(value, list):
-            path = self._path + ("images",)
-            results = []
-            for i, anno in enumerate(value):
-                temp_path = path + i
-                results.append(self._sub_validate(self.AnnotationValidator, anno, temp_path,
-                               canvas_uri=self.canvas_uri))
-            return results
-        if not value:
-            self.log_warning("images", "'images' SHOULD have values.")
+        if not value or not isinstance(value, list):
+            self.log_error("images", "'images' MUST be a list.")
             return value
-        self.log_error("images", "'images' must be a list.")
-        return value
+
+        path = self._path + ("images",)
+        results = []
+        for i, anno in enumerate(value):
+            temp_path = path + i
+            results.append(self._sub_validate(self.AnnotationValidator, anno, temp_path,
+                           canvas_uri=self.canvas_uri))
+        return results
 
     def other_content_field(self, value):
         """Validate ``otherContent`` field."""
