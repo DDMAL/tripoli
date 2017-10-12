@@ -1,5 +1,6 @@
 from .validator_logging import ValidatorLog
 
+
 class LinkedValidatorMixin:
     """Basic support for storing 'global' references in a single administrative class."""
 
