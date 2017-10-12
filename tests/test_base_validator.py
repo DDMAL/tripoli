@@ -1,7 +1,7 @@
 from .validator_testing_tools import ValidatorTestingTools
 from tripoli import IIIFValidator
 from tripoli.resource_validators.base_validator import BaseValidator
-from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning, Path
+from tripoli.validator_logging import ValidatorLogError, ValidatorLogWarning, ValidatorLog, Path
 from tripoli.exceptions import FailFastException
 
 
@@ -239,4 +239,72 @@ class TestBaseValidatorMixin(ValidatorTestingTools):
         self.assertTrue(self.has_errors())
         self.assertFalse(self.has_warnings())
         self.assertEqual(self.test_subject.errors.pop(), ValidatorLogError('test error', ('fake field',)))
+
+    def test_path_equality(self):
+        a = Path(('sequences', 0, 'metadata'))
+        b = Path(('sequences', 0, 'metadata'))
+        self.assertTrue(a == b)
+
+    def test_path_repr(self):
+        a = Path(('sequences', 0, 'metadata'))
+        self.assertEqual(repr(a), "Path('sequences', 0, 'metadata')")
+
+    def test_path_add(self):
+        a = Path(('sequences', 0, 'metadata'))
+        b = Path(('sequences', 0, 'metadata'))
+        self.assertEqual(repr(a + b), "Path('sequences', 0, 'metadata', 'sequences', 0, 'metadata')")
+
+    def test_path_raises_typeerror(self):
+        a = Path(('sequences', 0, 'metadata'))
+        b = {'foo': 'bar'}
+        with self.assertRaises(TypeError):
+            a + b
+
+    def test_path_returns_path(self):
+        a = Path(('sequences', 0, 'metadata'))
+        self.assertEqual(a.path, ('sequences', 0, 'metadata'))
+
+    def test_no_index_path_eq(self):
+        a = Path(('sequences', 0, 'metadata'))
+        b = Path(('sequences', 1, 'metadata'))
+        self.assertTrue(a.no_index_eq(b))
+
+    def test_no_index_endswith(self):
+        a = Path(('sequences', 0, 'metadata', 1))
+        b = Path(('sequences', 1, 'metadata'))
+        self.assertTrue(a.no_index_endswith(b))
+
+    def test_validator_log_lt(self):
+        x = ValidatorLogWarning('test error', ('fake field',))
+        y = ValidatorLogError('test error', ('fake field', 'another'))
+        self.assertTrue(x < y)
+
+    def test_validator_log_warning(self):
+        x = ValidatorLogWarning('test error', ('fake field',))
+        self.assertEqual(str(x), "Warning: test error @ data['fake field']")
+
+    def test_validator_log_warning_repr(self):
+        x = ValidatorLogWarning('test error', ('fake field',))
+        self.assertEqual(repr(x), "ValidatorLogWarning('test error',  @ data['fake field'])")
+
+    def test_validator_log_error_repr(self):
+        x = ValidatorLogError('test error', ('fake field',))
+        self.assertEqual(repr(x), "ValidatorLogError('test error',  @ data['fake field'])")
+
+    # NB: This should be tested with an actual traceback scenario.
+    def test_validator_log_print_trace(self):
+        x = ValidatorLogError('test error', ('fake field',))
+        self.assertIsNone(x.print_trace())
+
+    def test_validator_log_raises_typeerror_on_bad_add(self):
+        v = ValidatorLog()
+        with self.assertRaises(TypeError):
+            v.add("foo")
+
+    def test_validator_unique_logging(self):
+        v = ValidatorLog(unique_logging=False)
+        e = ValidatorLogError('test error', ('fake field',))
+        v.add(e)
+        self.assertEqual(len(v._entries), 1)
+
 

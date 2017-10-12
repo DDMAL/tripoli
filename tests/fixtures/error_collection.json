@@ -214,7 +214,7 @@
     {
       "label": "30: Canvas with non list images",
       "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": \"asdfasdf\", \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}",
-      "error": "Error: 'images' must be a list. @ data['sequences'][0]['canvases'][0]['images']",
+      "error": "Error: 'images' MUST be a list. @ data['sequences'][0]['canvases'][0]['images']",
       "@id": "http://iiif.io/api/presentation/2.0/example/errors/30/manifest.json",
       "@type": "sc:Manifest"
     },
@@ -228,7 +228,7 @@
     {
       "label": "32: Canvas with annotation directly in images",
       "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"images\": {\n            \"@type\": \"oa:Annotation\", \n            \"motivation\": \"sc:painting\", \n            \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n            \"resource\": {\n              \"@id\": \"http://example.net/image.jpg\", \n              \"@type\": \"dctypes:Image\"\n            }\n          }, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ]\n    }\n  ]\n}",
-      "error": "Error: 'images' must be a list. @ data['sequences'][0]['canvases'][0]['images']",
+      "error": "Error: 'images' MUST be a list. @ data['sequences'][0]['canvases'][0]['images']",
       "@id": "http://iiif.io/api/presentation/2.0/example/errors/32/manifest.json",
       "@type": "sc:Manifest"
     },
@@ -361,7 +361,7 @@
     {
       "label": "51: Invalid startCanvas value",
       "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1\n        }\n      ], \n      \"startCanvas\": \"http://example.net/not/a/canvas\"\n    }\n  ]\n}",
-      "error": "Error: 'startCanvas' must refer to the @id of some canvas in this sequence. @ data['sequences'][0]['startCanvas']",
+      "error": "Error: 'startCanvas' MUST refer to the @id of some canvas in this sequence. @ data['sequences'][0]['startCanvas']",
       "@id": "http://iiif.io/api/presentation/2.0/example/errors/51/manifest.json",
       "@type": "sc:Manifest"
     },
@@ -377,6 +377,27 @@
       "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n  \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n  \"@type\": \"sc:Manifest\", \n  \"label\": \"manifest\", \n  \"sequences\": [\n    {\n      \"@type\": \"sc:Sequence\", \n      \"canvases\": [\n        {\n          \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n          \"@type\": \"sc:Canvas\", \n          \"height\": 1, \n          \"label\": \"canvas\", \n          \"width\": 1,\n      \"service\": {\"@id\": \"http://example.net/some/service\"}\n        }\n      ]\n    }\n  ]\n}",
       "error": "Error: service MUST be valid JSON-LD, but has no '@context' key where one is required. @ data['sequences'][0]['canvases'][0]['service']",
       "@id": "http://iiif.io/api/presentation/2.0/example/errors/53/manifest.json",
+      "@type": "sc:Manifest"
+    },
+    {
+      "label": "54: Images should not have an empty list.",
+      "manifest": "{\n  \"@context\": \"http://iiif.io/api/presentation/2/context.json\",\n    \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\",\n    \"@type\": \"sc:Manifest\",\n    \"label\": \"manifest\",\n    \"sequences\": [\n{\n\"@type\": \"sc:Sequence\",\n\"canvases\": [\n{\n\"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\",\n                    \"@type\": \"sc:Canvas\",\n                    \"height\": 1,\n                    \"images\": [],\n                    \"label\": \"canvas\",\n                    \"width\": 1\n                }\n            ]\n        }\n    ]\n}",
+      "error": "Error: 'images' MUST be a list. @ data['sequences'][0]['canvases'][0]['images']",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/54/manifest.json",
+      "@type": "sc:Manifest"
+    },
+    {
+      "label": "55: Canvases are not allowed on a linked sequence.",
+      "manifest": "{\n \"@context\": \"http://iiif.io/api/presentation/2/context.json\",\n \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\",\n \"@type\": \"sc:Manifest\",\n \"label\": \"manifest\",\n \"sequences\": [\n {\n \"@type\": \"sc:Sequence\",\n \"@id\": \"http://example.org/iiif/book1/canvas/p1\",\n \"canvases\": [{\n \"@id\": \"http://example.org/iiif/book1/canvas/p1\",\n \"@type\": \"sc:Canvas\",\n \"label\": \"p. 1\",\n \"height\":2000,\n \"width\":1500,\n \"images\": [{\n \"@type\": \"oa:Annotation\",\n \"motivation\": \"sc:painting\",\n \"resource\":{\n \"@id\": \"http://example.org/iiif/book1/res/page1.jpg\",\n \"@type\": \"dctypes:Image\",\n \"format\": \"image/jpeg\",\n \"service\": {\n \"@context\": \"http://iiif.io/api/image/2/context.json\",\n \"@id\": \"http://example.org/images/book1-page1\",\n \"profile\": \"http://iiif.io/api/image/2/level1.json\"\n },\n \"height\":2000,\n \"width\":1500\n },\n \"on\": \"http://example.org/iiif/book1/canvas/p1\"\n }]\n }]\n },\n {\n \"@type\": \"sc:Sequence\",\n \"@id\": \"http://foo.com/sequence\",\n \"canvases\": []\n }\n ]\n}",
+      "error": "Error: 'canvas' is not allowed here @ data['sequences'][1]['canvas']",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/55/manifest.json",
+      "@type": "sc:Manifest"
+    },
+    {
+      "label": "56: Annotation with a bad @type",
+      "manifest": "{\n \"@context\": \"http://iiif.io/api/presentation/2/context.json\", \n \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/manifest.json\", \n \"@type\": \"sc:Manifest\", \n \"label\": \"manifest\", \n \"sequences\": [\n {\n \"@type\": \"sc:Sequence\", \n \"canvases\": [\n {\n \"@id\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n \"@type\": \"sc:Canvas\", \n \"height\": 1, \n \"images\": [\n {\n \"@type\": \"oa:BadAnnotation\",\n \"motivation\": \"sc:painting\",\n \"on\": \"http://iiif.io/api/presentation/2.0/example/errors/canvas/c1.json\", \n \"resource\": {\n \"@id\": \"http://example.net/image.jpg\", \n \"@type\": \"dctypes:Image\"\n }\n }\n ], \n \"label\": \"canvas\", \n \"width\": 1\n }\n ]\n }\n ]\n}",
+      "error": "Error: @type must be 'oa:Annotation'. @ data['sequences'][0]['canvases'][0]['images'][0]['@type']",
+      "@id": "http://iiif.io/api/presentation/2.0/example/errors/56/manifest.json",
       "@type": "sc:Manifest"
     }
   ],

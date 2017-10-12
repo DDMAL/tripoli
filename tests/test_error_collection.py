@@ -13,12 +13,11 @@ class TestErrorCollection(ValidatorTestingTools):
         self.base_dir = os.path.dirname(os.path.realpath(__file__))
 
     def test_error_collection(self):
-
         with open(os.path.join(self.base_dir, 'fixtures/error_collection.json')) as f:
             collection = json.load(f)
 
         for m in collection['manifests']:
             self.test_subject.validate(m['manifest'])
             self.assertTrue(self.has_errors(), "Did not catch error on '{}'".format(m['label']))
-            self.assertEqual(str(self.test_subject.errors[0]), m['error'])
+            self.assertEqual(str(self.test_subject.errors[0]), m['error'], m['label'])
             self.clear_errors_and_warnings()
