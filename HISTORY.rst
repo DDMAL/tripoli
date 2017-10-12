@@ -3,6 +3,20 @@
 Release History
 ---------------
 
+1.2.1 (2017-10-11)
+++++++++++++++++++
+
+**Improvements**
+
+- Unit testing improvements and enhanced coverage
+- Enhanced testing fixtures
+- Travis-CI builds and Coveralls integration
+
+**Bugfixes**
+
+- Multiple sequences are now correctly validated.
+- Canvas images are more thoroughly checked for their values.
+
 
 1.2.0 (2017-05-04)
 ++++++++++++++++++
