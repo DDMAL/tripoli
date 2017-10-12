@@ -81,6 +81,7 @@ class SequenceValidator(BaseValidator):
         if self.emb:
             self.log_error("@context", "@context field not allowed in embedded sequence.")
             return value
+
         if value != self.PRESENTATION_API_URI:
             self.log_error("@context", "unknown context.")
         return value
@@ -88,10 +89,12 @@ class SequenceValidator(BaseValidator):
     def startCanvas_field(self, value):
         """Validate ``startCanvas`` field."""
         canvases = self._json.get('canvases', [])
+
         if any(True for can in canvases if can.get('@id') == value):
             pass
         else:
-            self.log_error("startCanvas", "'startCanvas' must refer to the @id of some canvas in this sequence.")
+            self.log_error("startCanvas", "'startCanvas' MUST refer to the @id of some canvas in this sequence.")
+
         return value
 
     def canvases_field(self, value):
@@ -99,12 +102,16 @@ class SequenceValidator(BaseValidator):
         if not isinstance(value, list):
             self.log_error("canvases", "'canvases' MUST be a list.")
             return value
+
         if len(value) < 1:
             self.log_error("canvases", "'canvases' MUST have at least one entry")
             return value
+
         path = self._path + ("canvases",)
         results = []
+
         for i, canvas in enumerate(value):
             temp_path = path + i
             results.append(self._sub_validate(self.CanvasValidator, canvas, temp_path))
+
         return results
