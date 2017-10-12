@@ -72,7 +72,7 @@ class ManifestValidator(BaseValidator):
     def sequences_field(self, value):
         """Validate ``sequences`` list for Manifest.
 
-        Checks that exactly 1 sequence is embedded.
+        Checks that at least 1 sequence is embedded.
         """
         if not isinstance(value, list):
             self.log_error("sequences", "'sequences' MUST be a list")
