@@ -21,7 +21,7 @@ http://tripoli.readthedocs.io/en/latest/
 Installation
 ------------
 
-You can install Tripoli using pip.
+Python 3.5+ is required to run Tripoli. You can install Tripoli using pip.
 
 .. code:: bash
 
