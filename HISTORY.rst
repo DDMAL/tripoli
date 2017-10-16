@@ -3,7 +3,7 @@
 Release History
 ---------------
 
-1.2.1 (2017-10-11)
+1.2.1 (2017-10-11) / 1.2.2
 ++++++++++++++++++
 
 **Improvements**
@@ -16,6 +16,9 @@ Release History
 
 - Multiple sequences are now correctly validated.
 - Canvas images are more thoroughly checked for their values.
+
+NB: 1.2.2 is the same as 1.2.1, but incremented to try and address an issue with
+distributing via PyPI.
 
 
 1.2.0 (2017-05-04)

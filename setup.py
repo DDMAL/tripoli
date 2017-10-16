@@ -47,6 +47,7 @@ setup(
     url='https://github.com/DDMAL/tripoli',
     download_url='https://github.com/DDMAL/tripoli/tarball/master',
     keywords=['validator', 'IIIF'],
+    python_requires='>=3.5',
     install_requires=['defusedxml'],
     classifiers=[
         "License :: OSI Approved :: MIT License",
