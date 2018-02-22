@@ -3,6 +3,14 @@
 Release History
 ---------------
 
+2.0.0 (2018-02-22)
+++++++++++++++++++
+
+Tripoli v2.0.0 is functionally equivalent to v1.2.2. The major version number is being incremented
+to mirror the IIIF Presentation API version it supports. Tripoli v3 will only support Presentation
+API v3.
+
+
 1.2.1 (2017-10-11) / 1.2.2
 ++++++++++++++++++
 
