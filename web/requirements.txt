@@ -1,6 +1,6 @@
 aniso8601==1.1.0
 click==6.6
-Flask==0.11.1
+Flask==1.0
 Flask-RESTful==0.3.5
 itsdangerous==0.24
 Jinja2==2.8
@@ -14,7 +14,7 @@ ujson==1.35
 Werkzeug==0.15.3
 aniso8601==1.1.0
 click==6.6
-Flask==0.11.1
+Flask==1.0
 itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
