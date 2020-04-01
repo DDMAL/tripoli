@@ -11,7 +11,7 @@ requests==2.22.0
 six==1.10.0
 tripoli==1.0
 ujson==1.35
-Werkzeug==0.11.10
+Werkzeug==1.0.1
 aniso8601==1.1.0
 click==6.6
 Flask==0.11.1
@@ -24,4 +24,4 @@ requests==2.22.0
 six==1.10.0
 tripoli==1.0
 ujson==1.35
-Werkzeug==0.11.10
+Werkzeug==1.0.1
