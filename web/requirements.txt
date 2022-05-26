@@ -10,7 +10,7 @@ pytz==2016.6.1
 requests==2.10.0
 six==1.10.0
 tripoli==1.0
-ujson==1.35
+ujson==5.2.0
 Werkzeug==0.15.3
 aniso8601==1.1.0
 click==6.6
@@ -23,5 +23,5 @@ pytz==2016.6.1
 requests==2.10.0
 six==1.10.0
 tripoli==1.0
-ujson==1.35
+ujson==5.2.0
 Werkzeug==0.15.3
